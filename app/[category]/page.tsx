@@ -141,7 +141,7 @@ export default function CategoryPage({
       setRotationStep(next);
       rotationStepRef.current = next;
       setSelectedMenuIndex(next);
-      setTimeout(() => setIsAnimating(false), 600);
+      setTimeout(() => setIsAnimating(false), 900);
     },
     [setIsAnimating, setSelectedMenuIndex]
   );
@@ -160,7 +160,7 @@ export default function CategoryPage({
       navigateMenu(e.deltaY > 0 ? 1 : -1);
       setTimeout(() => {
         scrollLockRef.current = false;
-      }, 600);
+      }, 900);
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -190,7 +190,7 @@ export default function CategoryPage({
         setViewState(1);
         setSelectedRecipeId(null);
       }
-      setTimeout(() => setIsAnimating(false), 600);
+      setTimeout(() => setIsAnimating(false), 900);
     },
     [setIsAnimating, setSelectedMenuIndex, setViewState, setSelectedRecipeId, viewState]
   );
@@ -430,7 +430,7 @@ export default function CategoryPage({
                           scale: layout.scale,
                           opacity: layout.opacity,
                         }}
-                        transition={{ duration: 0.75, ease: EASE_CINEMATIC }}
+                        transition={{ duration: 1.1, ease: EASE_CINEMATIC }}
                         whileHover={{ scale: layout.scale * 1.1, opacity: 1 }}
                         onClick={() => selectRecipe(i)}
                         aria-label={recipe.name}
@@ -443,31 +443,38 @@ export default function CategoryPage({
                   })}
                 </div>
 
-                {/* Hero circle — in front of semi, slightly inset */}
+                {/* Hero circle — clipped by background circle area */}
                 <div
-                  className="fixed top-1/2 z-30 -translate-y-1/2"
-                  style={{ right: STAGE_INSET + HUB_INSET, width: 0, height: 0 }}
+                  className="fixed top-1/2 z-30 overflow-hidden rounded-full"
+                  style={{
+                    right: STAGE_INSET - SEMI_RADIUS,
+                    top: "50%",
+                    width: SEMI_DIAMETER,
+                    height: SEMI_DIAMETER,
+                    transform: "translateY(-50%)",
+                    pointerEvents: "none",
+                  }}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence initial={false}>
                     <motion.button
                       type="button"
                       key={currentRecipe.id}
-                      layoutId={`food-image-${currentRecipe.id}`}
                       className="absolute flex cursor-pointer items-center justify-center rounded-full text-7xl"
                       style={{
                         width: HERO_CIRCLE_SIZE,
                         height: HERO_CIRCLE_SIZE,
-                        left: -heroRadius,
-                        top: -heroRadius,
+                        left: SEMI_RADIUS - HUB_INSET - heroRadius,
+                        top: SEMI_RADIUS - heroRadius,
                         backgroundColor: circleBg,
                         boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
                         border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
-                        willChange: "transform, opacity",
+                        willChange: "transform",
+                        pointerEvents: "auto",
                       }}
-                      initial={{ scale: 0.9, opacity: 0.6 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.9, opacity: 0 }}
-                      transition={{ duration: 0.45, ease: EASE_STANDARD }}
+                      initial={{ x: SEMI_DIAMETER, zIndex: 1 }}
+                      animate={{ x: 0, zIndex: 2 }}
+                      exit={{ x: SEMI_DIAMETER, zIndex: 3 }}
+                      transition={{ duration: 1.1, ease: EASE_CINEMATIC }}
                       whileHover={{ scale: 1.04 }}
                       onClick={() => {
                         setViewState(2);
@@ -515,7 +522,7 @@ export default function CategoryPage({
                 {...detailEnter(0.1)}
               >
                 <motion.div
-                  layoutId={`food-image-${currentRecipe.id}`}
+
                   className="mb-5 flex h-[130px] w-[130px] items-center justify-center self-center rounded-full text-5xl"
                   style={{
                     backgroundColor: circleBg,
