@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useMemo, useRef } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -25,15 +25,17 @@ const SEMI_RADIUS = SEMI_DIAMETER / 2;
 const HERO_CIRCLE_SIZE = 370;
 const MENU_DOT_SIZE = 134;
 const MENU_DOT_BASE = 134;
-/** Menu dots on the outer arc (outside the semi-circle edge) */
+/** Menu dots orbit outside the big circle */
 const ORBIT_GAP = 24;
-const ORBIT_ON_SEMI = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
+const ORBIT_RADIUS = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
+/** Fixed angular spacing between dots (~20°) */
+const ORBIT_ANGLE_STEP = Math.PI * 0.11;
+/** Max visible dots (excluding active) on each side */
+const VISIBLE_SIDE = 2;
 /** Shift semi-circle stage left from the screen edge */
 const STAGE_INSET = 96;
 /** Hero sits inside the semi, left of its center */
 const HUB_INSET = HERO_CIRCLE_SIZE * 0.42;
-/** Visible left semicircle arc: top → left → bottom */
-const SEMI_ARC_SPAN = Math.PI * 0.88;
 
 type OrbitItemLayout = {
   index: number;
@@ -46,24 +48,31 @@ type OrbitItemLayout = {
 
 function getOrbitLayout(
   index: number,
-  activeIndex: number,
-  total: number
+  rotationStep: number,
+  _total: number
 ): OrbitItemLayout {
-  const offset = index - activeIndex;
-  const distance = Math.abs(offset);
-  const isActive = offset === 0;
-  const angleStep = SEMI_ARC_SPAN / Math.max(total - 1, 1);
-  /** π = leftmost point on semi-circle; scroll rotates along the arc */
-  const angle = Math.PI + offset * angleStep;
-  const x = Math.cos(angle) * ORBIT_ON_SEMI;
-  const y = Math.sin(angle) * ORBIT_ON_SEMI;
+  /**
+   * Each step, every dot's angle shifts by ORBIT_ANGLE_STEP.
+   * cos/sin are naturally periodic so positions wrap around the circle seamlessly.
+   */
+  const angle = Math.PI + (index - rotationStep) * ORBIT_ANGLE_STEP;
+
+  const x = Math.cos(angle) * ORBIT_RADIUS;
+  const y = Math.sin(angle) * ORBIT_RADIUS;
+
+  /** Normalised angular distance from the active position (π = leftmost) */
+  let angleDist = angle - Math.PI;
+  angleDist = angleDist - Math.round(angleDist / (2 * Math.PI)) * 2 * Math.PI;
+  const stepDist = Math.round(Math.abs(angleDist / ORBIT_ANGLE_STEP));
+  const isActive = stepDist === 0;
+  const visible = stepDist <= VISIBLE_SIDE;
 
   return {
     index,
     x,
     y,
-    opacity: isActive ? 1 : distance === 1 ? 0.88 : distance === 2 ? 0.65 : 0.45,
-    scale: isActive ? 1.12 : distance === 1 ? 1 : distance === 2 ? 0.92 : 0.85,
+    opacity: !visible ? 0 : isActive ? 1 : stepDist === 1 ? 0.85 : 0.6,
+    scale: isActive ? 1.12 : stepDist === 1 ? 1 : 0.9,
     isActive,
   };
 }
@@ -89,6 +98,9 @@ export default function CategoryPage({
     setSelectedRecipeId,
   } = useShowcaseStore();
 
+  const [rotationStep, setRotationStep] = useState(0);
+  const rotationStepRef = useRef(0);
+
   // Use refs for scroll handler to avoid stale closures
   const scrollLockRef = useRef(false);
   const isAnimatingRef = useRef(isAnimating);
@@ -99,12 +111,15 @@ export default function CategoryPage({
   useEffect(() => { isAnimatingRef.current = isAnimating; }, [isAnimating]);
   useEffect(() => { selectedMenuIndexRef.current = selectedMenuIndex; }, [selectedMenuIndex]);
   useEffect(() => { recipeListLenRef.current = recipeList.length; }, [recipeList.length]);
+  useEffect(() => { rotationStepRef.current = rotationStep; }, [rotationStep]);
 
   useEffect(() => {
     setSelectedMenuIndex(0);
     setViewState(1);
     setIsAnimating(false);
     setSelectedRecipeId(null);
+    setRotationStep(0);
+    rotationStepRef.current = 0;
   }, [category, setSelectedMenuIndex, setViewState, setIsAnimating, setSelectedRecipeId]);
 
   const currentRecipe = recipeList[selectedMenuIndex];
@@ -113,8 +128,8 @@ export default function CategoryPage({
 
   const heroRadius = HERO_CIRCLE_SIZE / 2;
   const orbitLayouts = useMemo(
-    () => recipeList.map((_, i) => getOrbitLayout(i, selectedMenuIndex, recipeList.length)),
-    [recipeList, selectedMenuIndex]
+    () => recipeList.map((_, i) => getOrbitLayout(i, rotationStep, recipeList.length)),
+    [recipeList, rotationStep]
   );
 
   const navigateMenu = useCallback(
@@ -123,8 +138,10 @@ export default function CategoryPage({
       const next = selectedMenuIndexRef.current + direction;
       if (next < 0 || next >= recipeListLenRef.current) return;
       setIsAnimating(true);
+      setRotationStep(next);
+      rotationStepRef.current = next;
       setSelectedMenuIndex(next);
-      setTimeout(() => setIsAnimating(false), 380);
+      setTimeout(() => setIsAnimating(false), 600);
     },
     [setIsAnimating, setSelectedMenuIndex]
   );
@@ -143,7 +160,7 @@ export default function CategoryPage({
       navigateMenu(e.deltaY > 0 ? 1 : -1);
       setTimeout(() => {
         scrollLockRef.current = false;
-      }, 380);
+      }, 600);
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -166,12 +183,14 @@ export default function CategoryPage({
     (index: number) => {
       if (isAnimatingRef.current || index === selectedMenuIndexRef.current) return;
       setIsAnimating(true);
+      setRotationStep(index);
+      rotationStepRef.current = index;
       setSelectedMenuIndex(index);
       if (viewState === 2) {
         setViewState(1);
         setSelectedRecipeId(null);
       }
-      setTimeout(() => setIsAnimating(false), 380);
+      setTimeout(() => setIsAnimating(false), 600);
     },
     [setIsAnimating, setSelectedMenuIndex, setViewState, setSelectedRecipeId, viewState]
   );
@@ -411,7 +430,7 @@ export default function CategoryPage({
                           scale: layout.scale,
                           opacity: layout.opacity,
                         }}
-                        transition={{ duration: 0.55, ease: EASE_CINEMATIC }}
+                        transition={{ duration: 0.75, ease: EASE_CINEMATIC }}
                         whileHover={{ scale: layout.scale * 1.1, opacity: 1 }}
                         onClick={() => selectRecipe(i)}
                         aria-label={recipe.name}
