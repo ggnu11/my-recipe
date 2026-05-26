@@ -22,7 +22,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
-const HERO_CIRCLE_SIZE = 370;
+const HERO_CIRCLE_SIZE = 420;
 const MENU_DOT_SIZE = 134;
 const MENU_DOT_BASE = 134;
 /** Menu dots orbit outside the big circle */
@@ -35,7 +35,7 @@ const VISIBLE_SIDE = 2;
 /** Shift semi-circle stage left from the screen edge */
 const STAGE_INSET = 96;
 /** Hero sits inside the semi, left of its center */
-const HUB_INSET = HERO_CIRCLE_SIZE * 0.42;
+const HUB_INSET = HERO_CIRCLE_SIZE * 0.55;
 
 type OrbitItemLayout = {
   index: number;
