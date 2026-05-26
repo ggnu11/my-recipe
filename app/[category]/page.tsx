@@ -20,15 +20,17 @@ import { useShowcaseStore } from "@/store/showcaseStore";
 import { useThemeStore } from "@/store/themeStore";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const SEMI_DIAMETER = 760;
+const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
-const HERO_CIRCLE_SIZE = 300;
-const MENU_DOT_SIZE = 108;
-const MENU_DOT_BASE = 108;
+const HERO_CIRCLE_SIZE = 370;
+const MENU_DOT_SIZE = 134;
+const MENU_DOT_BASE = 134;
 /** Menu dots on the outer arc (outside the semi-circle edge) */
 const ORBIT_GAP = 24;
 const ORBIT_ON_SEMI = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
-/** Pull hero hub inward so the center circle stays on screen */
+/** Shift semi-circle stage left from the screen edge */
+const STAGE_INSET = 96;
+/** Hero sits inside the semi, left of its center */
 const HUB_INSET = HERO_CIRCLE_SIZE * 0.42;
 /** Visible left semicircle arc: top → left → bottom */
 const SEMI_ARC_SPAN = Math.PI * 0.88;
@@ -122,7 +124,7 @@ export default function CategoryPage({
       if (next < 0 || next >= recipeListLenRef.current) return;
       setIsAnimating(true);
       setSelectedMenuIndex(next);
-      setTimeout(() => setIsAnimating(false), 580);
+      setTimeout(() => setIsAnimating(false), 380);
     },
     [setIsAnimating, setSelectedMenuIndex]
   );
@@ -136,12 +138,12 @@ export default function CategoryPage({
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (scrollLockRef.current || isAnimatingRef.current) return;
-      if (Math.abs(e.deltaY) < 30) return;
+      if (Math.abs(e.deltaY) < 15) return;
       scrollLockRef.current = true;
       navigateMenu(e.deltaY > 0 ? 1 : -1);
       setTimeout(() => {
         scrollLockRef.current = false;
-      }, 580);
+      }, 380);
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -169,7 +171,7 @@ export default function CategoryPage({
         setViewState(1);
         setSelectedRecipeId(null);
       }
-      setTimeout(() => setIsAnimating(false), 580);
+      setTimeout(() => setIsAnimating(false), 380);
     },
     [setIsAnimating, setSelectedMenuIndex, setViewState, setSelectedRecipeId, viewState]
   );
@@ -342,44 +344,45 @@ export default function CategoryPage({
                 </AnimatePresence>
               </div>
 
-              {/* Right — 왼쪽 반원(하현달형): viewport 기준 배치 */}
+              {/* Right — full circle, clipped only at viewport right edge */}
               <div className="relative min-h-0 flex-1 overflow-visible">
-                {/* z-1: clip 왼쪽 절반만 — 곡선이 왼쪽으로 휨 */}
-                <div
-                  className="pointer-events-none fixed top-1/2 right-0 z-[1] -translate-y-1/2 overflow-hidden"
-                  style={{
-                    width: SEMI_RADIUS,
-                    height: SEMI_DIAMETER,
-                  }}
-                >
+                <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
                   <div
-                    className="absolute top-1/2 left-full -translate-x-1/2 -translate-y-1/2 rounded-full"
-                    style={{
-                      width: SEMI_DIAMETER,
-                      height: SEMI_DIAMETER,
-                      background: isDark
-                        ? `radial-gradient(circle at 50% 50%, ${cat.color}35 0%, ${circleBg} 55%, ${circleBg} 100%)`
-                        : `radial-gradient(circle at 50% 50%, ${cat.color}55 0%, ${circleBg} 50%, ${cat.color}25 100%)`,
-                      boxShadow: `0 0 60px ${cat.color}${isDark ? "20" : "15"}`,
-                    }}
+                    className="absolute top-1/2"
+                    style={{ right: STAGE_INSET, width: 0, height: 0 }}
                   >
                     <div
                       className="absolute rounded-full"
                       style={{
-                        inset: "16%",
-                        backgroundColor: isDark
-                          ? categoryDarkBg[category] ?? cat.bg_color
-                          : cat.bg_color,
-                        opacity: 0.95,
+                        width: SEMI_DIAMETER,
+                        height: SEMI_DIAMETER,
+                        left: 0,
+                        top: 0,
+                        transform: "translate(-50%, -50%)",
+                        background: isDark
+                          ? `radial-gradient(circle at 50% 50%, ${cat.color}35 0%, ${circleBg} 55%, ${circleBg} 100%)`
+                          : `radial-gradient(circle at 50% 50%, ${cat.color}55 0%, ${circleBg} 50%, ${cat.color}25 100%)`,
+                        boxShadow: `0 0 60px ${cat.color}${isDark ? "20" : "15"}`,
                       }}
-                    />
+                    >
+                      <div
+                        className="absolute rounded-full"
+                        style={{
+                          inset: "16%",
+                          backgroundColor: isDark
+                            ? categoryDarkBg[category] ?? cat.bg_color
+                            : cat.bg_color,
+                          opacity: 0.95,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Orbit anchor = semi-circle center (screen right edge) */}
+                {/* Orbit anchor = circle center */}
                 <div
-                  className="fixed top-1/2 right-0 z-20 -translate-y-1/2"
-                  style={{ width: 0, height: 0 }}
+                  className="fixed top-1/2 z-20 -translate-y-1/2"
+                  style={{ right: STAGE_INSET, width: 0, height: 0 }}
                 >
                   {/* Menu dots on outer semi-circle arc */}
                   {recipeList.map((recipe, i) => {
@@ -424,7 +427,7 @@ export default function CategoryPage({
                 {/* Hero circle — in front of semi, slightly inset */}
                 <div
                   className="fixed top-1/2 z-30 -translate-y-1/2"
-                  style={{ right: HUB_INSET, width: 0, height: 0 }}
+                  style={{ right: STAGE_INSET + HUB_INSET, width: 0, height: 0 }}
                 >
                   <AnimatePresence mode="wait">
                     <motion.button
@@ -461,7 +464,7 @@ export default function CategoryPage({
                 <div
                   className="pointer-events-none fixed inset-0 z-0"
                   style={{
-                    background: `radial-gradient(circle at 100% 50%, ${cat.color}${isDark ? "10" : "06"} 0%, transparent 38%)`,
+                    background: `radial-gradient(circle at calc(100% - ${STAGE_INSET}px) 50%, ${cat.color}${isDark ? "10" : "06"} 0%, transparent 38%)`,
                   }}
                 />
               </div>
