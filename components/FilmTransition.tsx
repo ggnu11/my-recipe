@@ -20,6 +20,7 @@ export function FilmTransition({ children }: { children: ReactNode }) {
   const clearTransition = useTransitionStore((s) => s.clearTransition);
 
   const [, forceRender] = useState(0);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const oldSlotRef = useRef<HTMLDivElement>(null);
@@ -77,13 +78,18 @@ export function FilmTransition({ children }: { children: ReactNode }) {
   const handleTransitionEnd = useCallback(
     (e: React.TransitionEvent) => {
       if (e.propertyName !== "transform") return;
-      if (stripRef.current) {
-        stripRef.current.style.transition = "";
-        stripRef.current.style.transform = "";
+
+      // Clean up ALL inline styles via DOM BEFORE React re-renders,
+      // so the layout is already stable when framer-motion measures.
+      if (oldSlotRef.current) oldSlotRef.current.innerHTML = "";
+      if (stripRef.current) stripRef.current.style.cssText = "";
+      if (contentRef.current) contentRef.current.style.cssText = "";
+      if (wrapperRef.current) {
+        wrapperRef.current.style.cssText = "";
+        // Force reflow — layout is now stable at final state
+        wrapperRef.current.getBoundingClientRect();
       }
-      if (oldSlotRef.current) {
-        oldSlotRef.current.innerHTML = "";
-      }
+
       state.current.animating = false;
       state.current.dir = null;
       clearTransition();
@@ -98,6 +104,7 @@ export function FilmTransition({ children }: { children: ReactNode }) {
 
   return (
     <div
+      ref={wrapperRef}
       style={
         animating
           ? {

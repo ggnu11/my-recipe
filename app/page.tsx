@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cardStagger, EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
+import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
 import { categories, recipes, categoryEmoji, categoryDarkBg } from "@/lib/mock-data";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useThemeStore } from "@/store/themeStore";
@@ -40,7 +40,7 @@ export default function Home() {
       {/* Header */}
       <motion.header
         className="flex items-center justify-between px-10 py-8"
-        initial={{ opacity: 0, y: -20 }}
+        initial={direction ? false : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
       >
@@ -67,10 +67,6 @@ export default function Home() {
             return (
               <motion.div
                 key={cat.slug}
-                custom={i}
-                variants={cardStagger}
-                initial="initial"
-                animate="animate"
                 whileHover={{
                   y: -6,
                   borderColor: "rgba(200,169,110,0.5)",
@@ -81,7 +77,6 @@ export default function Home() {
                 style={{
                   backgroundColor: cardBg,
                   border: `1px solid var(--border)`,
-                  willChange: "transform, opacity",
                 }}
               >
                 {/* Glow on hover */}
@@ -97,8 +92,7 @@ export default function Home() {
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
                   className="relative z-10 flex flex-col items-center gap-5 p-10"
                 >
-                  <motion.div
-                    layoutId={`category-circle-${cat.slug}`}
+                  <div
                     className="flex h-[72px] w-[72px] items-center justify-center rounded-full text-3xl"
                     style={{
                       backgroundColor: `${cat.color}20`,
@@ -106,7 +100,7 @@ export default function Home() {
                     }}
                   >
                     {categoryEmoji[cat.slug]}
-                  </motion.div>
+                  </div>
 
                   <div className="flex flex-col items-center gap-2">
                     <span
