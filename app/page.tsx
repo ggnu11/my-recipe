@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cardStagger, EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
 import { categories, recipes, categoryEmoji, categoryDarkBg } from "@/lib/mock-data";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useThemeStore } from "@/store/themeStore";
+import { useTransitionStore } from "@/store/transitionStore";
 
 const categoryLabel: Record<string, string> = {
   korean: "Korean Food",
@@ -22,6 +24,16 @@ const categoryDesc: Record<string, string> = {
 export default function Home() {
   const theme = useThemeStore((s) => s.theme);
   const isDark = theme === "dark";
+  const router = useRouter();
+  const setDirection = useTransitionStore((s) => s.setDirection);
+  const direction = useTransitionStore((s) => s.direction);
+
+  const handleCategoryClick = (e: React.MouseEvent, slug: string) => {
+    e.preventDefault();
+    if (direction) return;
+    setDirection("down");
+    router.push(`/${slug}`);
+  };
 
   return (
     <div className="vignette flex min-h-screen flex-col">
@@ -82,6 +94,7 @@ export default function Home() {
 
                 <Link
                   href={`/${cat.slug}`}
+                  onClick={(e) => handleCategoryClick(e, cat.slug)}
                   className="relative z-10 flex flex-col items-center gap-5 p-10"
                 >
                   <motion.div

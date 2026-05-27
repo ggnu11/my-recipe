@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   EASE_CINEMATIC,
   EASE_STANDARD,
@@ -18,6 +19,7 @@ import {
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
 import { useThemeStore } from "@/store/themeStore";
+import { useTransitionStore } from "@/store/transitionStore";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const SEMI_DIAMETER = 940;
@@ -87,6 +89,16 @@ export default function CategoryPage({
   const recipeList = getRecipesByCategory(category);
   const theme = useThemeStore((s) => s.theme);
   const isDark = theme === "dark";
+  const router = useRouter();
+  const setDirection = useTransitionStore((s) => s.setDirection);
+  const transitionDirection = useTransitionStore((s) => s.direction);
+
+  const handleBack = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (transitionDirection) return;
+    setDirection("up");
+    router.push("/");
+  }, [transitionDirection, setDirection, router]);
 
   const {
     selectedMenuIndex,
@@ -230,6 +242,7 @@ export default function CategoryPage({
         >
           <Link
             href="/"
+            onClick={handleBack}
             className="inline-flex items-center gap-2 text-sm transition-colors"
             style={{ color: "var(--text-muted)" }}
           >
@@ -271,6 +284,7 @@ export default function CategoryPage({
               <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-center justify-between px-8 py-5">
                 <Link
                   href="/"
+                  onClick={handleBack}
                   className="pointer-events-auto inline-flex items-center gap-2 text-sm transition-colors"
                   style={{ color: "var(--text-muted)" }}
                 >
