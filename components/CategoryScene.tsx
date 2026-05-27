@@ -557,7 +557,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                       <div key={step.id}>
                         <p
                           className="mb-2 text-[10px] uppercase tracking-[0.2em]"
-                          style={{ color: `${cat.color}` }}
+                          style={{ color: cat.color }}
                         >
                           Step {step.step_number}
                         </p>
@@ -592,9 +592,9 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                             </p>
                             {step.tip_items.length > 0 && (
                               <ul className="mt-2 space-y-1 pl-3 text-sm">
-                                {step.tip_items.map((item, i) => (
+                                {step.tip_items.map((item, idx) => (
                                   <li
-                                    key={i}
+                                    key={idx}
                                     className="flex items-start gap-2"
                                     style={{ color: "var(--text-muted)" }}
                                   >
@@ -647,26 +647,6 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             </motion.div>
           ) : null}
         </AnimatePresence>
-
-        {/* Close button */}
-        {viewState === 2 && (
-          <motion.button
-            onClick={() => {
-              setViewState(1);
-              setSelectedRecipeId(null);
-            }}
-            className="absolute right-5 top-16 z-20 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors"
-            style={{
-              backgroundColor: "var(--surface)",
-              color: "var(--text-muted)",
-            }}
-            aria-label="Close"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.4 } }}
-          >
-            ✕
-          </motion.button>
-        )}
       </main>
     </div>
   );

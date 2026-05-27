@@ -6,6 +6,7 @@ import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
 import { ThemeToggle } from "./ThemeToggle";
 import { getCategoryBySlug } from "@/lib/mock-data";
+import { useShowcaseStore } from "@/store/showcaseStore";
 
 const DURATION = "1.6s";
 const EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -73,7 +74,11 @@ export function SceneManager() {
     }
   }, []);
 
-  const handleBack = useCallback(() => {
+  const viewState = useShowcaseStore((s) => s.viewState);
+  const setViewState = useShowcaseStore((s) => s.setViewState);
+  const setSelectedRecipeId = useShowcaseStore((s) => s.setSelectedRecipeId);
+
+  const handleGoHome = useCallback(() => {
     if (transitioningRef.current) return;
     transitioningRef.current = true;
     window.history.pushState(null, "", "/");
@@ -84,6 +89,15 @@ export function SceneManager() {
       stripRef.current.style.transform = "translateY(-100vh)";
     }
   }, []);
+
+  const handleBack = useCallback(() => {
+    if (viewState === 2) {
+      setViewState(1);
+      setSelectedRecipeId(null);
+      return;
+    }
+    handleGoHome();
+  }, [viewState, setViewState, setSelectedRecipeId, handleGoHome]);
 
   const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
     if (e.target !== stripRef.current) return;
