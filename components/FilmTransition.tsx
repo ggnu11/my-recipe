@@ -9,7 +9,6 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { MotionConfig } from "framer-motion";
 import { useTransitionStore } from "@/store/transitionStore";
 
 const DURATION = "1.2s";
@@ -126,23 +125,21 @@ export function FilmTransition({ children }: { children: ReactNode }) {
         )}
 
         {/* Current page — always rendered, stable key prevents remount */}
-        <MotionConfig reducedMotion={animating ? "always" : "never"}>
-          <div
-            key="current"
-            ref={contentRef}
-            style={
-              animating
-                ? {
-                    height: "100vh",
-                    overflow: "hidden",
-                    transform: "translateZ(0)",
-                  }
-                : undefined
-            }
-          >
-            {children}
-          </div>
-        </MotionConfig>
+        <div
+          key="current"
+          ref={contentRef}
+          style={
+            animating
+              ? {
+                  height: "100vh",
+                  overflow: "hidden",
+                  transform: "translateZ(0)",
+                }
+              : undefined
+          }
+        >
+          {children}
+        </div>
 
         {/* Old page snapshot BELOW — during "down" (forward) */}
         {isDown && (
