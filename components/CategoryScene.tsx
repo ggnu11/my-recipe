@@ -17,18 +17,17 @@ import {
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
 import { useThemeStore } from "@/store/themeStore";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
 const HERO_CIRCLE_SIZE = 420;
-const MENU_DOT_SIZE = 134;
-const MENU_DOT_BASE = 134;
+const MENU_DOT_SIZE = 100;
+const MENU_DOT_BASE = 100;
 const ORBIT_GAP = 24;
 const ORBIT_RADIUS = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
 const ORBIT_ANGLE_STEP = Math.PI * 0.11;
 const VISIBLE_SIDE = 2;
-const STAGE_INSET = 96;
+const STAGE_INSET = 48;
 const HUB_INSET = HERO_CIRCLE_SIZE * 0.55;
 
 type OrbitItemLayout = {
@@ -67,23 +66,14 @@ function getOrbitLayout(
 interface CategorySceneProps {
   category: string;
   visible: boolean;
-  onBack: () => void;
   visitKey: number;
 }
 
-export function CategoryScene({ category, visible, onBack, visitKey }: CategorySceneProps) {
+export function CategoryScene({ category, visible, visitKey }: CategorySceneProps) {
   const cat = getCategoryBySlug(category);
   const recipeList = getRecipesByCategory(category);
   const theme = useThemeStore((s) => s.theme);
   const isDark = theme === "dark";
-
-  const handleBack = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      onBack();
-    },
-    [onBack]
-  );
 
   const SLIDE_DURATION = 1.4;
   const leftAnim = {
@@ -234,38 +224,6 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
         transition={{ duration: 1, ease: EASE_CINEMATIC }}
       />
 
-      {viewState === 2 && (
-        <header
-          className="relative z-20 flex shrink-0 items-center justify-between border-b px-8 py-5"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <a
-            href="/"
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 text-sm transition-colors"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="opacity-60">
-              <path
-                d="M10 12L6 8L10 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Back
-          </a>
-          <h2
-            className="absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-[0.2em] uppercase"
-            style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
-          >
-            {cat.name}
-          </h2>
-          <ThemeToggle />
-        </header>
-      )}
-
       <main ref={mainRef} className="relative z-10 flex flex-1 overflow-x-hidden overflow-y-hidden">
         <AnimatePresence mode="wait">
           {viewState === 1 && currentRecipe ? (
@@ -278,36 +236,6 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
               transition={{ duration: 0.3 }}
               style={{ willChange: "opacity" }}
             >
-              {/* Floating controls */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-center justify-between px-8 py-5">
-                <a
-                  href="/"
-                  onClick={handleBack}
-                  className="pointer-events-auto inline-flex items-center gap-2 text-sm transition-colors"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="opacity-60">
-                    <path
-                      d="M10 12L6 8L10 4"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Back
-                </a>
-                <h2
-                  className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-[0.2em] uppercase"
-                  style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
-                >
-                  {cat.name}
-                </h2>
-                <div className="pointer-events-auto">
-                  <ThemeToggle />
-                </div>
-              </div>
-
               {/* Left — recipe copy */}
               <motion.div
                 className="flex w-[42%] min-w-0 flex-col justify-center px-10 pl-14 lg:px-16 lg:pl-20"
@@ -380,7 +308,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
 
               {/* Right — full circle */}
               <div className="relative min-h-0 flex-1 overflow-visible">
-                <motion.div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" style={{ position: "absolute" }} {...rightAnim}>
+                <motion.div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden" {...rightAnim}>
                   <div
                     className="absolute top-1/2"
                     style={{ right: STAGE_INSET, width: 0, height: 0 }}
@@ -415,7 +343,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
 
                 {/* Orbit anchor */}
                 <motion.div
-                  className="absolute top-1/2 z-20"
+                  className="fixed top-1/2 z-20"
                   style={{ right: STAGE_INSET, width: 0, height: 0, y: "-50%" }}
                   {...rightAnim}
                 >
@@ -427,7 +355,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
                       <motion.button
                         type="button"
                         key={`orbit-${recipe.id}`}
-                        className="absolute flex cursor-pointer items-center justify-center rounded-full text-4xl"
+                        className="absolute flex cursor-pointer items-center justify-center rounded-full text-3xl"
                         style={{
                           width: MENU_DOT_BASE,
                           height: MENU_DOT_BASE,
@@ -460,7 +388,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
 
                 {/* Hero circle */}
                 <motion.div
-                  className="absolute top-1/2 z-30 overflow-hidden rounded-full"
+                  className="fixed top-1/2 z-30 overflow-hidden rounded-full"
                   style={{
                     right: STAGE_INSET - SEMI_RADIUS,
                     top: "50%",
@@ -504,7 +432,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
                 </motion.div>
 
                 <motion.div
-                  className="pointer-events-none absolute inset-0 z-0"
+                  className="pointer-events-none fixed inset-0 z-0"
                   style={{
                     background: `radial-gradient(circle at calc(100% - ${STAGE_INSET}px) 50%, ${cat.color}${isDark ? "10" : "06"} 0%, transparent 38%)`,
                   }}
@@ -525,7 +453,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
           ) : viewState === 2 && currentRecipe ? (
             <motion.div
               key={`detail-${currentRecipe.id}`}
-              className="flex flex-1"
+              className="flex flex-1 pt-16"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -727,7 +655,7 @@ export function CategoryScene({ category, visible, onBack, visitKey }: CategoryS
               setViewState(1);
               setSelectedRecipeId(null);
             }}
-            className="absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors"
+            className="absolute right-5 top-16 z-20 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors"
             style={{
               backgroundColor: "var(--surface)",
               color: "var(--text-muted)",

@@ -1,8 +1,11 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
+import { ThemeToggle } from "./ThemeToggle";
+import { getCategoryBySlug } from "@/lib/mock-data";
 
 const DURATION = "1.6s";
 const EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -91,8 +94,76 @@ export function SceneManager() {
     }
   }, []);
 
+  const cat = getCategoryBySlug(category);
+
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "var(--bg)" }}>
+      {/* Shared header — stays in place during transitions */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center px-8 py-5"
+      >
+        <div className="pointer-events-auto">
+          <AnimatePresence>
+            {categoryVisible && (
+              <motion.a
+                key="back"
+                href="/"
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  handleBack();
+                }}
+                className="inline-flex items-center gap-2 text-sm transition-colors"
+                style={{ color: "var(--text-muted)" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className="opacity-60"
+                >
+                  <path
+                    d="M10 12L6 8L10 4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Back
+              </motion.a>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <AnimatePresence>
+          {categoryVisible && cat && (
+            <motion.h2
+              key="title"
+              className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-[0.2em] uppercase"
+              style={{
+                color: "#c8a96e",
+                fontFamily: "var(--font-serif), serif",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {cat.name}
+            </motion.h2>
+          )}
+        </AnimatePresence>
+
+        <div className="pointer-events-auto ml-auto">
+          <ThemeToggle />
+        </div>
+      </div>
+
       <div
         ref={stripRef}
         onTransitionEnd={handleTransitionEnd}
@@ -109,7 +180,6 @@ export function SceneManager() {
           <CategoryScene
             category={category}
             visible={categoryVisible}
-            onBack={handleBack}
             visitKey={visitKey}
           />
         </div>

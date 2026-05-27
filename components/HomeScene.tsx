@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
 import { categories, recipes, categoryEmoji, categoryDarkBg } from "@/lib/mock-data";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useThemeStore } from "@/store/themeStore";
 
 const categoryLabel: Record<string, string> = {
@@ -37,11 +36,6 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
 
   return (
     <div className="vignette flex h-full flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-end px-10 py-6">
-        <ThemeToggle />
-      </header>
-
       {/* Center content */}
       <main className="flex flex-1 flex-col items-center justify-center px-10 pb-20">
         {/* Title & description */}
