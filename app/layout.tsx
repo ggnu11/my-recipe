@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { FilmTransition } from "@/components/FilmTransition";
+import { SceneManager } from "@/components/SceneManager";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,7 +38,8 @@ export default function RootLayout({
     >
       <body className="noise-overlay min-h-full">
         <ThemeProvider>
-          <FilmTransition>{children}</FilmTransition>
+          <SceneManager />
+          <div style={{ display: "none" }}>{children}</div>
         </ThemeProvider>
       </body>
     </html>

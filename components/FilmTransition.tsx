@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useTransitionStore } from "@/store/transitionStore";
 
-const DURATION = "1.2s";
+const DURATION = "1.6s";
 const EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 export function FilmTransition({ children }: { children: ReactNode }) {
@@ -59,6 +59,30 @@ export function FilmTransition({ children }: { children: ReactNode }) {
       // Inject the captured snapshot of the old page
       oldSlotRef.current.innerHTML = snapshotRef.current;
 
+      // For "up" (back): animate left/right content out within the snapshot
+      if (state.current.dir === "up") {
+        const EXIT_DURATION = "2s";
+        const SLIDE_CSS = `transform ${EXIT_DURATION} ${EASING}, opacity ${EXIT_DURATION} ${EASING}`;
+        const left = oldSlotRef.current.querySelector<HTMLElement>('[data-anim="left"]');
+        const right = oldSlotRef.current.querySelector<HTMLElement>('[data-anim="right"]');
+        if (left) {
+          left.style.transition = "none";
+          left.style.transform = "translateX(0)";
+          left.getBoundingClientRect();
+          left.style.transition = SLIDE_CSS;
+          left.style.transform = "translateX(-50vw)";
+          left.style.opacity = "0";
+        }
+        if (right) {
+          right.style.transition = "none";
+          right.style.transform = "translateX(0)";
+          right.getBoundingClientRect();
+          right.style.transition = SLIDE_CSS;
+          right.style.transform = "translateX(50vw)";
+          right.style.opacity = "0";
+        }
+      }
+
       const el = stripRef.current;
       const isDown = state.current.dir === "down";
 
@@ -77,16 +101,20 @@ export function FilmTransition({ children }: { children: ReactNode }) {
 
   const handleTransitionEnd = useCallback(
     (e: React.TransitionEvent) => {
+      // Only respond to the strip's own transition, not bubbled child events
+      if (e.target !== stripRef.current) return;
       if (e.propertyName !== "transform") return;
 
-      // Clean up ALL inline styles via DOM BEFORE React re-renders,
-      // so the layout is already stable when framer-motion measures.
-      if (oldSlotRef.current) oldSlotRef.current.innerHTML = "";
+      // 1. Collapse old slot FIRST so it takes no space
+      if (oldSlotRef.current) {
+        oldSlotRef.current.style.display = "none";
+        oldSlotRef.current.innerHTML = "";
+      }
+      // 2. Now safe to clear strip transform — home page stays at top
       if (stripRef.current) stripRef.current.style.cssText = "";
       if (contentRef.current) contentRef.current.style.cssText = "";
       if (wrapperRef.current) {
         wrapperRef.current.style.cssText = "";
-        // Force reflow — layout is now stable at final state
         wrapperRef.current.getBoundingClientRect();
       }
 
