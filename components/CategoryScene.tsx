@@ -34,7 +34,7 @@ const CINEMA_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const CT = `1.2s ${CINEMA_EASE}`;
 
 // Detail layout
-const DETAIL_EMOJI_SIZE = 140;
+const DETAIL_EMOJI_SIZE = 280;
 
 type OrbitItemLayout = {
   index: number;
@@ -199,8 +199,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
     ? `radial-gradient(circle at 50% 50%, ${cat.color}35 0%, ${circleBg} 55%, ${circleBg} 100%)`
     : `radial-gradient(circle at 50% 50%, ${cat.color}55 0%, ${circleBg} 50%, ${cat.color}25 100%)`;
   const circleGradientDetail = isDark
-    ? `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}20 100%)`
-    : `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}10 100%)`;
+    ? `linear-gradient(160deg, #1e1e1e 0%, #2a2a2a 100%)`
+    : `linear-gradient(160deg, #3a3a3a 0%, #4a4a4a 100%)`;
 
   // Three-state position helpers
   const circlePos = !visible
@@ -231,8 +231,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
       }
     : isDetail
       ? {
-          left: 40,
-          top: 70,
+          left: "calc(25% - 140px)",
+          top: 20,
           width: DETAIL_EMOJI_SIZE,
           height: DETAIL_EMOJI_SIZE,
           transform: "rotate(360deg)",
@@ -382,7 +382,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             backgroundColor: circleBg,
             border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
             boxShadow: isDetail
-              ? `0 0 40px ${cat.color}${isDark ? "18" : "12"}`
+              ? `0 0 60px rgba(0,0,0,0.4), 0 0 30px ${cat.color}15`
               : `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
             ...emojiPos,
           }}
@@ -413,7 +413,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               >
                 <span
                   style={{
-                    fontSize: isDetail ? "3rem" : "4.5rem",
+                    fontSize: isDetail ? "7rem" : "4.5rem",
                     transition: `font-size ${CT}`,
                     lineHeight: 1,
                   }}
@@ -525,154 +525,100 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
         >
           {currentRecipe && (
             <div className="flex h-full">
-              {/* Left 50% — over circle background */}
-              <div className="flex w-1/2 flex-col overflow-hidden pt-14">
-                {/* Recipe info beside emoji */}
-                <div
-                  className="shrink-0 px-8"
-                  style={{ paddingLeft: DETAIL_EMOJI_SIZE + 70 }}
-                >
-                  <h3
-                    className="text-2xl font-bold"
-                    style={{
-                      color: "var(--text-primary)",
-                      fontFamily: "var(--font-serif), serif",
-                    }}
-                  >
-                    {currentRecipe.name}
-                  </h3>
-                  {currentRecipe.subtitle && (
-                    <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-                      {currentRecipe.subtitle}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs" style={{ color: "var(--text-faint)" }}>
-                    {currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
-                  </p>
-                </div>
+              {/* Left 50% — dark bg from circle morph */}
+              <div className="flex w-1/2 flex-col overflow-hidden">
+                {/* Top: large food plate area (emoji lives here via absolute pos) */}
+                <div style={{ height: "45%", minHeight: 240 }} />
 
-                {/* Ingredients | Steps */}
-                <div className="mt-6 flex flex-1 gap-6 overflow-hidden px-8">
-                  {/* Ingredients */}
-                  <div className="w-[200px] shrink-0 overflow-y-auto">
-                    <h4
-                      className="mb-3 text-[10px] uppercase tracking-[0.2em]"
-                      style={{ color: "#c8a96e" }}
-                    >
-                      Ingredients
-                    </h4>
-                    <ul className="flex flex-col gap-2.5">
-                      {ingredients.map((ing, i) => (
-                        <motion.li
-                          key={ing.id}
-                          className="flex items-center gap-3 text-sm"
-                          initial={{ opacity: 0, x: -12 }}
-                          animate={
-                            isDetail
-                              ? {
-                                  opacity: 1,
-                                  x: 0,
-                                  transition: {
-                                    delay: 0.6 + i * 0.06,
-                                    duration: 0.35,
-                                    ease: EASE_CINEMATIC,
-                                  },
-                                }
-                              : { opacity: 0, x: -12 }
-                          }
+                {/* Bottom: Ingredients | Steps */}
+                <div className="flex flex-1 gap-0 overflow-hidden">
+                  {/* Ingredients column */}
+                  <div className="flex w-[160px] shrink-0 flex-col gap-5 overflow-y-auto py-4 pl-6 pr-3">
+                    {ingredients.map((ing, i) => (
+                      <motion.div
+                        key={ing.id}
+                        className="flex flex-col items-center gap-2"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={
+                          isDetail
+                            ? {
+                                opacity: 1,
+                                y: 0,
+                                transition: {
+                                  delay: 0.6 + i * 0.08,
+                                  duration: 0.4,
+                                  ease: EASE_CINEMATIC,
+                                },
+                              }
+                            : { opacity: 0, y: 12 }
+                        }
+                      >
+                        <span
+                          className="flex h-[52px] w-[52px] items-center justify-center rounded-full text-xl"
+                          style={{
+                            backgroundColor: `${cat.color}18`,
+                            border: `1px solid ${cat.color}30`,
+                          }}
                         >
-                          <span
-                            className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full text-base"
-                            style={{ backgroundColor: `${cat.color}15` }}
-                          >
-                            {ing.emoji}
-                          </span>
-                          <span className="flex flex-col">
-                            <span style={{ color: "var(--text-primary)" }}>{ing.name}</span>
-                            {ing.amount && (
-                              <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
-                                {ing.amount}
-                              </span>
-                            )}
-                          </span>
-                        </motion.li>
-                      ))}
-                      {ingredients.length === 0 && (
-                        <li className="text-xs" style={{ color: "var(--text-faint)" }}>
-                          No ingredients listed
-                        </li>
-                      )}
-                    </ul>
+                          {ing.emoji}
+                        </span>
+                        <span
+                          className="text-center text-xs leading-tight"
+                          style={{ color: "rgba(255,255,255,0.85)" }}
+                        >
+                          {ing.name}
+                        </span>
+                      </motion.div>
+                    ))}
+                    {ingredients.length === 0 && (
+                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        No ingredients
+                      </p>
+                    )}
                   </div>
 
-                  {/* Steps */}
-                  <div className="flex-1 overflow-y-auto pr-4">
-                    <h4
-                      className="mb-6 text-[10px] uppercase tracking-[0.2em]"
-                      style={{ color: "#c8a96e" }}
-                    >
-                      Cooking Steps
-                    </h4>
+                  {/* Steps column */}
+                  <div className="flex-1 overflow-y-auto py-4 pr-6 pl-4">
                     {steps.length > 0 ? (
-                      <div className="flex flex-col gap-8">
-                        {steps.map((step) => (
-                          <div key={step.id}>
-                            <p
-                              className="mb-1 text-[10px] uppercase tracking-[0.2em]"
-                              style={{ color: cat.color }}
-                            >
-                              Step {step.step_number}
-                            </p>
+                      <div className="flex flex-col gap-6">
+                        {steps.map((step, i) => (
+                          <motion.div
+                            key={step.id}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={
+                              isDetail
+                                ? {
+                                    opacity: 1,
+                                    y: 0,
+                                    transition: {
+                                      delay: 0.7 + i * 0.1,
+                                      duration: 0.4,
+                                      ease: EASE_CINEMATIC,
+                                    },
+                                  }
+                                : { opacity: 0, y: 16 }
+                            }
+                          >
                             <h5
-                              className="mb-1 text-base font-semibold"
+                              className="mb-2 text-sm font-bold"
                               style={{
-                                color: "var(--text-primary)",
+                                color: "rgba(255,255,255,0.95)",
                                 fontFamily: "var(--font-serif), serif",
                               }}
                             >
-                              {step.title}
+                              Step {step.step_number}
                             </h5>
                             <p
-                              className="text-sm leading-[1.8]"
-                              style={{ color: "var(--text-secondary)" }}
+                              className="text-[13px] leading-[1.9]"
+                              style={{ color: "rgba(255,255,255,0.6)" }}
                             >
                               {step.description}
                             </p>
-                            {step.tip && (
-                              <div
-                                className="mt-3 rounded-r-lg py-2.5 pl-3.5 pr-3"
-                                style={{
-                                  borderLeft: "3px solid rgba(200,169,110,0.6)",
-                                  backgroundColor: "rgba(200,169,110,0.06)",
-                                }}
-                              >
-                                <p className="mb-1 text-[10px] font-semibold tracking-[0.15em] text-[#c8a96e]">
-                                  TIP
-                                </p>
-                                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                                  {step.tip}
-                                </p>
-                                {step.tip_items.length > 0 && (
-                                  <ul className="mt-2 space-y-1 pl-3 text-sm">
-                                    {step.tip_items.map((item, idx) => (
-                                      <li
-                                        key={idx}
-                                        className="flex items-start gap-2"
-                                        style={{ color: "var(--text-muted)" }}
-                                      >
-                                        <span className="mt-1.5 block h-1 w-1 shrink-0 rounded-full bg-[#c8a96e]/40" />
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm" style={{ color: "var(--text-faint)" }}>
+                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
                         No cooking steps available.
                       </p>
                     )}
@@ -683,10 +629,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               {/* Right 50% — Video */}
               <motion.div
                 className="flex w-1/2 flex-col"
-                style={{
-                  borderLeft: "1px solid var(--border)",
-                  backgroundColor: "var(--overlay-bg)",
-                }}
+                style={{ backgroundColor: "#000" }}
                 initial={false}
                 animate={
                   isDetail
@@ -712,7 +655,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center gap-4">
                     <span className="text-6xl" style={{ opacity: 0.3 }}>🎬</span>
-                    <p className="text-sm tracking-wide" style={{ color: "var(--text-faint)" }}>
+                    <p className="text-sm tracking-wide" style={{ color: "rgba(255,255,255,0.35)" }}>
                       Video coming soon
                     </p>
                   </div>
