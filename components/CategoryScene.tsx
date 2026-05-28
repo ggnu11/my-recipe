@@ -86,6 +86,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
   } = useShowcaseStore();
 
   const isDetail = viewState === 2;
+  const wasDetailRef = useRef(false);
 
   const [rotationStep, setRotationStep] = useState(0);
   const rotationStepRef = useRef(0);
@@ -107,6 +108,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => { wasDetailRef.current = isDetail; }, [isDetail]);
   useEffect(() => { isAnimatingRef.current = isAnimating; }, [isAnimating]);
   useEffect(() => { selectedMenuIndexRef.current = selectedMenuIndex; }, [selectedMenuIndex]);
   useEffect(() => { recipeListLenRef.current = recipeList.length; }, [recipeList.length]);
@@ -359,11 +361,13 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             ...cinematic,
             opacity: isDetail
               ? { duration: 0 }
-              : { duration: 0, delay: cinematic.duration },
+              : wasDetailRef.current
+                ? { duration: 0, delay: cinematic.duration }
+                : { duration: 0 },
           }}
         >
           {currentRecipe && (
-            <AnimatePresence initial={false}>
+            <AnimatePresence>
               <motion.button
                 type="button"
                 key={currentRecipe.id}
