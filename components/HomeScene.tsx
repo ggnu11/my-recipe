@@ -18,9 +18,9 @@ const categoryDesc: Record<string, string> = {
 };
 
 const categoryImage: Record<string, string> = {
-  korean: "/category-korea.png",
-  chinese: "/category-chinese.png",
-  western: "/category-japanese.png",
+  korean: "/category-korea.webp",
+  chinese: "/category-chinese.webp",
+  western: "/category-japanese.webp",
 };
 
 const TRAIN_DURATION = 1.4;
@@ -135,7 +135,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                 <a
                   href={`/${cat.slug}`}
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
-                  className="relative z-10 flex flex-col items-center rounded-[22px] px-6 pb-6 pt-[72px] transition-shadow duration-300 group-hover:shadow-xl"
+                  className="relative z-10 flex h-[200px] flex-col items-center rounded-[22px] px-6 pb-6 pt-[72px] transition-shadow duration-300 group-hover:shadow-xl"
                   style={{
                     backgroundColor: isDark ? "#1c1c1e" : "#fff",
                     boxShadow: isDark
