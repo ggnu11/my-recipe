@@ -212,15 +212,17 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
   const cinematic = { duration: 1.2, ease: EASE_CINEMATIC };
 
   // === MORPH CALCULATIONS (transform-based, GPU only) ===
-  // Circle: carousel center → detail center (covers left 50%)
-  const circleDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET);
-  const circleScaleX = (cSize.w * 0.5) / SEMI_DIAMETER;
-  const circleScaleY = cSize.h / SEMI_DIAMETER;
+  // Phase 1: semi-circle → full viewport
+  const fullDx = -cSize.w / 2 + STAGE_INSET;
+  const fullScaleX = cSize.w / SEMI_DIAMETER;
+  const fullScaleY = cSize.h / SEMI_DIAMETER;
+  // Phase 2: full viewport → left 50%
+  const halfDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET);
+  const halfScaleX = (cSize.w * 0.5) / SEMI_DIAMETER;
 
-  // Detail hero: standalone element that morphs from carousel position to detail position
-  const emojiDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET - HUB_INSET);
-  const emojiDy = cSize.h * 0.225 - cSize.h / 2;
-  const emojiScale = DETAIL_EMOJI_SIZE / HERO_CIRCLE_SIZE;
+  // Detail hero: moves to top-left, bottom half visible (center at viewport top)
+  const heroDetailDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET - HUB_INSET);
+  const heroDetailDy = -cSize.h / 2;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -256,10 +258,20 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             !visible
               ? { x: "100vw", opacity: 0, scaleX: 1, scaleY: 1, borderRadius: "50%" }
               : isDetail
-                ? { x: circleDx, scaleX: circleScaleX, scaleY: circleScaleY, borderRadius: "0%", opacity: 1 }
+                ? {
+                    x: [0, fullDx, halfDx],
+                    scaleX: [1, fullScaleX, halfScaleX],
+                    scaleY: [1, fullScaleY, fullScaleY],
+                    borderRadius: ["50%", "0%", "0%"],
+                    opacity: 1,
+                  }
                 : { x: 0, scaleX: 1, scaleY: 1, borderRadius: "50%", opacity: 1 }
           }
-          transition={cinematic}
+          transition={
+            isDetail
+              ? { duration: 1.8, ease: EASE_CINEMATIC, times: [0, 0.5, 1] }
+              : cinematic
+          }
         >
           {/* Carousel gradient */}
           <motion.div
@@ -419,15 +431,14 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           initial={false}
           animate={
             isDetail
-              ? { x: emojiDx, y: emojiDy, scale: emojiScale, rotate: 360, opacity: 1 }
+              ? { x: heroDetailDx, y: heroDetailDy, scale: 1, rotate: 360, opacity: 1 }
               : { x: 0, y: 0, scale: 1, rotate: 0, opacity: 0 }
           }
-          transition={{
-            ...cinematic,
-            opacity: isDetail
-              ? { duration: 0 }
-              : { duration: 0, delay: cinematic.duration },
-          }}
+          transition={
+            isDetail
+              ? { duration: 1.8, delay: 0, ease: EASE_CINEMATIC, opacity: { duration: 0 } }
+              : { ...cinematic, opacity: { duration: 0, delay: cinematic.duration } }
+          }
         >
           {currentRecipe && (
             <span className="flex h-full w-full items-center justify-center text-7xl">
@@ -530,7 +541,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           animate={{ opacity: isDetail ? 1 : 0 }}
           transition={{
             duration: 0.5,
-            delay: isDetail ? 0.4 : 0,
+            delay: isDetail ? 1.4 : 0,
             ease: EASE_CINEMATIC,
           }}
         >
@@ -556,7 +567,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                                 opacity: 1,
                                 y: 0,
                                 transition: {
-                                  delay: 0.5 + i * 0.08,
+                                  delay: 1.5 + i * 0.08,
                                   duration: 0.4,
                                   ease: EASE_CINEMATIC,
                                 },
@@ -602,7 +613,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                                     opacity: 1,
                                     y: 0,
                                     transition: {
-                                      delay: 0.6 + i * 0.1,
+                                      delay: 1.6 + i * 0.1,
                                       duration: 0.4,
                                       ease: EASE_CINEMATIC,
                                     },
@@ -652,7 +663,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 }
                 transition={{
                   duration: 0.8,
-                  delay: isDetail ? 0.5 : 0,
+                  delay: isDetail ? 1.2 : 0,
                   ease: EASE_CINEMATIC,
                 }}
               >
