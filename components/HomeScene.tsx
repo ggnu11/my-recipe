@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
-import { categories, recipes, categoryEmoji, categoryDarkBg } from "@/lib/mock-data";
+import { categories, recipes, categoryDarkBg } from "@/lib/mock-data";
 import { useThemeStore } from "@/store/themeStore";
 
 const categoryLabel: Record<string, string> = {
@@ -15,6 +15,12 @@ const categoryDesc: Record<string, string> = {
   korean: "Traditional flavors passed down through generations",
   chinese: "Bold and aromatic dishes from the East",
   western: "Classic European culinary artistry",
+};
+
+const categoryImage: Record<string, string> = {
+  korean: "/category-korea.png",
+  chinese: "/category-chinese.png",
+  western: "/category-japanese.png",
 };
 
 const TRAIN_DURATION = 1.4;
@@ -93,18 +99,17 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
         </motion.div>
 
         {/* Category cards — train animation */}
-        <div className="mt-14 flex w-full max-w-4xl gap-5">
+        <div className="mt-20 flex w-full max-w-4xl gap-8">
           {categories.map((cat, i) => {
             const count = recipes.filter(
               (r) => r.category_id === cat.id && r.published
             ).length;
-            const cardBg = isDark
-              ? categoryDarkBg[cat.slug] ?? cat.bg_color
-              : cat.bg_color;
 
             return (
               <motion.div
                 key={cat.slug}
+                className="group relative flex-1"
+                style={{ paddingTop: 60 }}
                 initial={{ x: "100vw" }}
                 animate={
                   visible
@@ -125,65 +130,90 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         },
                       }
                 }
-                whileHover={{
-                  y: -6,
-                  borderColor: "rgba(200,169,110,0.5)",
-                  transition: { duration: 0.3, ease: EASE_STANDARD },
-                }}
                 whileTap={{ scale: 0.97 }}
-                className="group relative flex-1 overflow-hidden rounded-[20px]"
-                style={{
-                  backgroundColor: cardBg,
-                  border: "1px solid var(--border)",
-                }}
               >
-                {/* Glow on hover */}
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  style={{
-                    background: `radial-gradient(circle at 50% 40%, ${cat.color}${isDark ? "25" : "20"} 0%, transparent 60%)`,
-                  }}
-                />
-
                 <a
                   href={`/${cat.slug}`}
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
-                  className="relative z-10 flex flex-col items-center gap-5 p-10"
+                  className="relative z-10 flex flex-col items-center rounded-[22px] px-6 pb-6 pt-[72px] transition-shadow duration-300 group-hover:shadow-xl"
+                  style={{
+                    backgroundColor: isDark ? "#1c1c1e" : "#fff",
+                    boxShadow: isDark
+                      ? "0 4px 24px rgba(0,0,0,0.3)"
+                      : "0 4px 24px rgba(0,0,0,0.07)",
+                  }}
                 >
-                  <div
-                    className="flex h-[72px] w-[72px] items-center justify-center rounded-full text-3xl"
+                  {/* Circular food image — overlapping card top */}
+                  <div className="absolute -top-[50px] left-1/2 z-20 -translate-x-1/2">
+                    <div className="relative">
+                      <motion.div
+                        className="overflow-hidden rounded-full"
+                        style={{
+                          width: 130,
+                          height: 130,
+                          boxShadow: isDark
+                            ? "0 8px 28px rgba(0,0,0,0.5)"
+                            : "0 8px 28px rgba(0,0,0,0.12)",
+                        }}
+                        whileHover={{
+                          scale: 1.08,
+                          transition: { duration: 0.3, ease: EASE_STANDARD },
+                        }}
+                      >
+                        <img
+                          src={categoryImage[cat.slug]}
+                          alt={categoryLabel[cat.slug]}
+                          className="h-full w-full object-cover"
+                          draggable={false}
+                        />
+                      </motion.div>
+                      {/* Recipe count badge */}
+                      <span
+                        className="absolute -right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+                        style={{
+                          backgroundColor: isDark ? "#2a2a2a" : "#fff",
+                          color: cat.color,
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                        }}
+                      >
+                        {count}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3
+                    className="text-lg font-bold tracking-wide"
                     style={{
-                      backgroundColor: `${cat.color}20`,
-                      boxShadow: `0 0 40px ${cat.color}${isDark ? "15" : "10"}`,
+                      color: "var(--text-primary)",
+                      fontFamily: "var(--font-serif), serif",
                     }}
                   >
-                    {categoryEmoji[cat.slug]}
-                  </div>
+                    {categoryLabel[cat.slug]}
+                  </h3>
+                  <p
+                    className="mt-2.5 text-center text-xs leading-relaxed"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {categoryDesc[cat.slug]}
+                  </p>
 
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="mt-5 flex w-full items-center justify-between">
                     <span
-                      className="text-xl font-bold tracking-wide"
+                      className="text-sm font-semibold"
+                      style={{ color: cat.color }}
+                    >
+                      {count} Recipes
+                    </span>
+                    <span
+                      className="rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-wide transition-colors duration-200"
                       style={{
-                        color: "var(--text-primary)",
-                        fontFamily: "var(--font-serif), serif",
+                        backgroundColor: `${cat.color}15`,
+                        color: cat.color,
                       }}
                     >
-                      {categoryLabel[cat.slug]}
-                    </span>
-                    <span
-                      className="text-center text-sm leading-relaxed"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {categoryDesc[cat.slug]}
+                      Explore
                     </span>
                   </div>
-
-                  <span
-                    className="mt-1 text-xs tracking-[0.15em] uppercase"
-                    style={{ color: cat.color }}
-                  >
-                    {count} Recipes
-                  </span>
                 </a>
               </motion.div>
             );

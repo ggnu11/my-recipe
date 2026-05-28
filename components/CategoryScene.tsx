@@ -28,12 +28,6 @@ const ORBIT_ANGLE_STEP = Math.PI * 0.11;
 const VISIBLE_SIDE = 2;
 const STAGE_INSET = 48;
 const HUB_INSET = HERO_CIRCLE_SIZE * 0.55;
-
-// Cinematic transition
-const CINEMA_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-const CT = `1.2s ${CINEMA_EASE}`;
-
-// Detail layout
 const DETAIL_EMOJI_SIZE = 280;
 
 type OrbitItemLayout = {
@@ -101,12 +95,23 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
   const recipeListLenRef = useRef(recipeList.length);
   const mainRef = useRef<HTMLElement>(null);
 
+  // Container size for transform calculations
+  const [cSize, setCSize] = useState({ w: 1440, h: 900 });
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const update = () => setCSize({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => { isAnimatingRef.current = isAnimating; }, [isAnimating]);
   useEffect(() => { selectedMenuIndexRef.current = selectedMenuIndex; }, [selectedMenuIndex]);
   useEffect(() => { recipeListLenRef.current = recipeList.length; }, [recipeList.length]);
   useEffect(() => { rotationStepRef.current = rotationStep; }, [rotationStep]);
 
-  // Reset on every visit
   useEffect(() => {
     setSelectedMenuIndex(0);
     setViewState(1);
@@ -195,55 +200,25 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
 
   const circleBg = isDark ? (categoryDarkBg[category] ?? cat.bg_color) : cat.bg_color;
 
-  const circleGradientCarousel = isDark
+  const circleGradient = isDark
     ? `radial-gradient(circle at 50% 50%, ${cat.color}35 0%, ${circleBg} 55%, ${circleBg} 100%)`
     : `radial-gradient(circle at 50% 50%, ${cat.color}55 0%, ${circleBg} 50%, ${cat.color}25 100%)`;
-  const circleGradientDetail = isDark
-    ? `linear-gradient(160deg, #1e1e1e 0%, #2a2a2a 100%)`
-    : `linear-gradient(160deg, #3a3a3a 0%, #4a4a4a 100%)`;
+  const detailBg = isDark
+    ? `linear-gradient(160deg, ${categoryDarkBg[category] ?? "#1e1e1e"} 0%, ${cat.color}12 100%)`
+    : `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}12 100%)`;
 
-  // Three-state position helpers
-  const circlePos = !visible
-    ? {
-        left: "calc(100% + 200px)",
-        top: `calc(50% - ${SEMI_RADIUS}px)`,
-        width: SEMI_DIAMETER,
-        height: SEMI_DIAMETER,
-        borderRadius: "50%",
-      }
-    : isDetail
-      ? { left: 0, top: 0, width: "50%", height: "100%", borderRadius: 0 }
-      : {
-          left: `calc(100% - ${STAGE_INSET + SEMI_RADIUS}px)`,
-          top: `calc(50% - ${SEMI_RADIUS}px)`,
-          width: SEMI_DIAMETER,
-          height: SEMI_DIAMETER,
-          borderRadius: "50%",
-        };
+  const cinematic = { duration: 1.2, ease: EASE_CINEMATIC };
 
-  const emojiPos = !visible
-    ? {
-        left: "calc(100% + 200px)",
-        top: `calc(50% - ${heroRadius}px)`,
-        width: HERO_CIRCLE_SIZE,
-        height: HERO_CIRCLE_SIZE,
-        transform: "rotate(0deg)",
-      }
-    : isDetail
-      ? {
-          left: "calc(25% - 140px)",
-          top: 20,
-          width: DETAIL_EMOJI_SIZE,
-          height: DETAIL_EMOJI_SIZE,
-          transform: "rotate(360deg)",
-        }
-      : {
-          left: `calc(100% - ${STAGE_INSET + HUB_INSET + heroRadius}px)`,
-          top: `calc(50% - ${heroRadius}px)`,
-          width: HERO_CIRCLE_SIZE,
-          height: HERO_CIRCLE_SIZE,
-          transform: "rotate(0deg)",
-        };
+  // === MORPH CALCULATIONS (transform-based, GPU only) ===
+  // Circle: carousel center → detail center (covers left 50%)
+  const circleDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET);
+  const circleScaleX = (cSize.w * 0.5) / SEMI_DIAMETER;
+  const circleScaleY = cSize.h / SEMI_DIAMETER;
+
+  // Emoji: carousel center → detail center (top area of left half)
+  const emojiDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET - HUB_INSET);
+  const emojiDy = cSize.h * 0.225 - cSize.h / 2;
+  const emojiScale = DETAIL_EMOJI_SIZE / HERO_CIRCLE_SIZE;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -264,52 +239,48 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
 
       <main ref={mainRef} className="relative z-10 flex flex-1 overflow-x-hidden overflow-y-hidden">
 
-        {/* ═══ BIG CIRCLE → DETAIL LEFT BG ═══ */}
-        <div
+        {/* ═══ BIG CIRCLE — morphs via transform (GPU composited) ═══ */}
+        <motion.div
+          className="pointer-events-none absolute z-[2] overflow-hidden"
           style={{
-            position: "absolute",
-            zIndex: 1,
-            overflow: "hidden",
-            willChange: "left, top, width, height, border-radius",
-            transition: [
-              `left ${CT}`, `top ${CT}`, `width ${CT}`, `height ${CT}`,
-              `border-radius ${CT}`, `box-shadow ${CT}`,
-            ].join(", "),
-            boxShadow: isDetail
-              ? "none"
-              : `0 0 60px ${cat.color}${isDark ? "20" : "15"}`,
-            ...circlePos,
+            left: `calc(100% - ${STAGE_INSET + SEMI_RADIUS}px)`,
+            top: `calc(50% - ${SEMI_RADIUS}px)`,
+            width: SEMI_DIAMETER,
+            height: SEMI_DIAMETER,
+            willChange: "transform, opacity",
           }}
+          initial={{ x: "100vw", opacity: 0 }}
+          animate={
+            !visible
+              ? { x: "100vw", opacity: 0, scaleX: 1, scaleY: 1, borderRadius: "50%" }
+              : isDetail
+                ? { x: circleDx, scaleX: circleScaleX, scaleY: circleScaleY, borderRadius: "0%", opacity: 1 }
+                : { x: 0, scaleX: 1, scaleY: 1, borderRadius: "50%", opacity: 1 }
+          }
+          transition={cinematic}
         >
-          {/* Carousel gradient layer */}
-          <div
-            style={{
-              position: "absolute", inset: 0,
-              background: circleGradientCarousel,
-              opacity: isDetail ? 0 : 1,
-              transition: `opacity ${CT}`,
-            }}
+          {/* Carousel gradient */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ background: circleGradient }}
+            animate={{ opacity: isDetail ? 0 : 1 }}
+            transition={cinematic}
           />
-          {/* Detail gradient layer */}
-          <div
-            style={{
-              position: "absolute", inset: 0,
-              background: circleGradientDetail,
-              opacity: isDetail ? 1 : 0,
-              transition: `opacity ${CT}`,
-            }}
+          {/* Detail gradient */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ background: detailBg }}
+            animate={{ opacity: isDetail ? 1 : 0 }}
+            transition={cinematic}
           />
           {/* Inner lighter ring */}
-          <div
-            style={{
-              position: "absolute",
-              borderRadius: "50%",
-              backgroundColor: circleBg,
-              transition: `opacity ${CT}, inset ${CT}`,
-              ...(isDetail ? { inset: 0, opacity: 0 } : { inset: "16%", opacity: 0.95 }),
-            }}
+          <motion.div
+            className="absolute rounded-full"
+            style={{ inset: "16%", backgroundColor: circleBg }}
+            animate={{ opacity: isDetail ? 0 : 0.95 }}
+            transition={cinematic}
           />
-        </div>
+        </motion.div>
 
         {/* ═══ ORBIT DOTS ═══ */}
         <motion.div
@@ -327,7 +298,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               ? { x: 0, opacity: isDetail ? 0 : 1 }
               : { x: "100vw", opacity: 0 }
           }
-          transition={{ duration: 1.2, ease: EASE_CINEMATIC }}
+          transition={cinematic}
         >
           {recipeList.map((recipe, i) => {
             const layout = orbitLayouts[i];
@@ -367,37 +338,37 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           })}
         </motion.div>
 
-        {/* ═══ HERO EMOJI ═══ */}
-        <div
+        {/* ═══ HERO EMOJI — travels via transform (GPU composited) ═══ */}
+        <motion.div
+          className="absolute z-30 overflow-hidden rounded-full"
           style={{
-            position: "absolute",
-            zIndex: 30,
-            overflow: "hidden",
-            borderRadius: "50%",
-            willChange: "left, top, width, height, transform",
-            transition: [
-              `left ${CT}`, `top ${CT}`, `width ${CT}`, `height ${CT}`,
-              `transform ${CT}`, `box-shadow ${CT}`,
-            ].join(", "),
+            left: `calc(100% - ${STAGE_INSET + HUB_INSET + heroRadius}px)`,
+            top: `calc(50% - ${heroRadius}px)`,
+            width: HERO_CIRCLE_SIZE,
+            height: HERO_CIRCLE_SIZE,
             backgroundColor: circleBg,
             border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
-            boxShadow: isDetail
-              ? `0 0 60px rgba(0,0,0,0.4), 0 0 30px ${cat.color}15`
-              : `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
-            ...emojiPos,
+            boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
+            willChange: "transform, opacity",
+            pointerEvents: isDetail ? "none" : "auto",
           }}
+          initial={{ x: "100vw", opacity: 0 }}
+          animate={
+            !visible
+              ? { x: "100vw", opacity: 0, scale: 1, rotate: 0 }
+              : isDetail
+                ? { x: emojiDx, y: emojiDy, scale: emojiScale, rotate: 360, opacity: 1 }
+                : { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 }
+          }
+          transition={cinematic}
         >
           {currentRecipe && (
             <AnimatePresence initial={false}>
               <motion.button
                 type="button"
                 key={currentRecipe.id}
-                className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full"
-                style={{
-                  willChange: "transform",
-                  pointerEvents: isDetail ? "none" : "auto",
-                  cursor: isDetail ? "default" : "pointer",
-                }}
+                className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full text-7xl"
+                style={{ willChange: "transform" }}
                 initial={{ x: HERO_CIRCLE_SIZE }}
                 animate={{ x: 0 }}
                 exit={{ x: HERO_CIRCLE_SIZE }}
@@ -411,19 +382,11 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 }}
                 aria-label={currentRecipe ? `${currentRecipe.name} 상세 보기` : ""}
               >
-                <span
-                  style={{
-                    fontSize: isDetail ? "7rem" : "4.5rem",
-                    transition: `font-size ${CT}`,
-                    lineHeight: 1,
-                  }}
-                >
-                  {recipeEmoji[currentRecipe.id] ?? "🍽️"}
-                </span>
+                {recipeEmoji[currentRecipe.id] ?? "🍽️"}
               </motion.button>
             </AnimatePresence>
           )}
-        </div>
+        </motion.div>
 
         {/* ═══ CAROUSEL LEFT TEXT ═══ */}
         <motion.div
@@ -440,7 +403,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 ? { x: -60, opacity: 0 }
                 : { x: 0, opacity: 1 }
           }
-          transition={{ duration: 1.2, ease: EASE_CINEMATIC }}
+          transition={cinematic}
         >
           <div className="px-10 pl-14 lg:px-16 lg:pl-20">
             {currentRecipe && (
@@ -519,15 +482,15 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           animate={{ opacity: isDetail ? 1 : 0 }}
           transition={{
             duration: 0.5,
-            delay: isDetail ? 0.5 : 0,
+            delay: isDetail ? 0.4 : 0,
             ease: EASE_CINEMATIC,
           }}
         >
           {currentRecipe && (
             <div className="flex h-full">
-              {/* Left 50% — dark bg from circle morph */}
+              {/* Left 50% — over morphed circle background */}
               <div className="flex w-1/2 flex-col overflow-hidden">
-                {/* Top: large food plate area (emoji lives here via absolute pos) */}
+                {/* Spacer for traveling emoji plate */}
                 <div style={{ height: "45%", minHeight: 240 }} />
 
                 {/* Bottom: Ingredients | Steps */}
@@ -545,7 +508,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                                 opacity: 1,
                                 y: 0,
                                 transition: {
-                                  delay: 0.6 + i * 0.08,
+                                  delay: 0.5 + i * 0.08,
                                   duration: 0.4,
                                   ease: EASE_CINEMATIC,
                                 },
@@ -564,14 +527,14 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                         </span>
                         <span
                           className="text-center text-xs leading-tight"
-                          style={{ color: "rgba(255,255,255,0.85)" }}
+                          style={{ color: "var(--text-primary)" }}
                         >
                           {ing.name}
                         </span>
                       </motion.div>
                     ))}
                     {ingredients.length === 0 && (
-                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      <p className="text-xs" style={{ color: "var(--text-faint)" }}>
                         No ingredients
                       </p>
                     )}
@@ -591,7 +554,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                                     opacity: 1,
                                     y: 0,
                                     transition: {
-                                      delay: 0.7 + i * 0.1,
+                                      delay: 0.6 + i * 0.1,
                                       duration: 0.4,
                                       ease: EASE_CINEMATIC,
                                     },
@@ -602,7 +565,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                             <h5
                               className="mb-2 text-sm font-bold"
                               style={{
-                                color: "rgba(255,255,255,0.95)",
+                                color: "var(--text-primary)",
                                 fontFamily: "var(--font-serif), serif",
                               }}
                             >
@@ -610,7 +573,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                             </h5>
                             <p
                               className="text-[13px] leading-[1.9]"
-                              style={{ color: "rgba(255,255,255,0.6)" }}
+                              style={{ color: "var(--text-secondary)" }}
                             >
                               {step.description}
                             </p>
@@ -618,7 +581,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      <p className="text-sm" style={{ color: "var(--text-faint)" }}>
                         No cooking steps available.
                       </p>
                     )}
@@ -629,7 +592,10 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               {/* Right 50% — Video */}
               <motion.div
                 className="flex w-1/2 flex-col"
-                style={{ backgroundColor: "#000" }}
+                style={{
+                  borderLeft: "1px solid var(--border)",
+                  backgroundColor: "var(--overlay-bg)",
+                }}
                 initial={false}
                 animate={
                   isDetail
@@ -638,7 +604,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 }
                 transition={{
                   duration: 0.8,
-                  delay: isDetail ? 0.6 : 0,
+                  delay: isDetail ? 0.5 : 0,
                   ease: EASE_CINEMATIC,
                 }}
               >
@@ -655,7 +621,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center gap-4">
                     <span className="text-6xl" style={{ opacity: 0.3 }}>🎬</span>
-                    <p className="text-sm tracking-wide" style={{ color: "rgba(255,255,255,0.35)" }}>
+                    <p className="text-sm tracking-wide" style={{ color: "var(--text-faint)" }}>
                       Video coming soon
                     </p>
                   </div>
@@ -666,28 +632,25 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
         </motion.div>
 
         {/* Background glow */}
-        <div
+        <motion.div
           className="pointer-events-none absolute inset-0 z-0"
           style={{
             background: `radial-gradient(circle at calc(100% - ${STAGE_INSET}px) 50%, ${cat.color}${isDark ? "10" : "06"} 0%, transparent 38%)`,
-            opacity: visible && !isDetail ? 1 : 0,
-            transition: "opacity 0.6s ease",
           }}
+          animate={{ opacity: visible && !isDetail ? 1 : 0 }}
+          transition={{ duration: 0.6 }}
         />
 
         {/* Scroll hint */}
         {recipeList.length > 1 && (
-          <p
+          <motion.p
             className="absolute bottom-6 left-14 z-10 text-[10px] tracking-[0.18em] uppercase"
-            style={{
-              color: "var(--text-faint)",
-              opacity: visible && !isDetail ? 1 : 0,
-              transition: "opacity 0.5s ease",
-              pointerEvents: "none",
-            }}
+            style={{ color: "var(--text-faint)", pointerEvents: "none" }}
+            animate={{ opacity: visible && !isDetail ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
           >
             Scroll to change menu
-          </p>
+          </motion.p>
         )}
       </main>
     </div>
