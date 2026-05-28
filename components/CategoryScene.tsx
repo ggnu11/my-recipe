@@ -215,7 +215,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
   const circleScaleX = (cSize.w * 0.5) / SEMI_DIAMETER;
   const circleScaleY = cSize.h / SEMI_DIAMETER;
 
-  // Emoji: carousel center → detail center (top area of left half)
+  // Detail hero: standalone element that morphs from carousel position to detail position
   const emojiDx = cSize.w * 0.25 - (cSize.w - STAGE_INSET - HUB_INSET);
   const emojiDy = cSize.h * 0.225 - cSize.h / 2;
   const emojiScale = DETAIL_EMOJI_SIZE / HERO_CIRCLE_SIZE;
@@ -292,11 +292,11 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             height: 0,
             pointerEvents: isDetail ? "none" : "auto",
           }}
-          initial={{ x: "100vw" }}
+          initial={{ x: "100vw", rotate: 120 }}
           animate={
             visible
-              ? { x: 0, opacity: isDetail ? 0 : 1 }
-              : { x: "100vw", opacity: 0 }
+              ? { x: 0, rotate: 0, opacity: isDetail ? 0 : 1 }
+              : { x: "100vw", rotate: 120, opacity: 0 }
           }
           transition={cinematic}
         >
@@ -338,7 +338,67 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           })}
         </motion.div>
 
-        {/* ═══ HERO EMOJI — travels via transform (GPU composited) ═══ */}
+        {/* ═══ HERO CIRCLE CLIP — slides hero in/out on menu change (carousel only) ═══ */}
+        <motion.div
+          className="absolute z-30 overflow-hidden rounded-full"
+          style={{
+            left: `calc(100% - ${STAGE_INSET + SEMI_RADIUS}px)`,
+            top: `calc(50% - ${SEMI_RADIUS}px)`,
+            width: SEMI_DIAMETER,
+            height: SEMI_DIAMETER,
+            pointerEvents: "none",
+            willChange: "transform, opacity",
+          }}
+          initial={{ x: "100vw", opacity: 0 }}
+          animate={
+            !visible
+              ? { x: "100vw", opacity: 0 }
+              : { x: 0, opacity: isDetail ? 0 : 1 }
+          }
+          transition={{
+            ...cinematic,
+            opacity: isDetail
+              ? { duration: 0 }
+              : { duration: 0, delay: cinematic.duration },
+          }}
+        >
+          {currentRecipe && (
+            <AnimatePresence initial={false}>
+              <motion.button
+                type="button"
+                key={currentRecipe.id}
+                className="absolute flex cursor-pointer items-center justify-center rounded-full text-7xl"
+                style={{
+                  width: HERO_CIRCLE_SIZE,
+                  height: HERO_CIRCLE_SIZE,
+                  left: SEMI_RADIUS - HUB_INSET - heroRadius,
+                  top: SEMI_RADIUS - heroRadius,
+                  backgroundColor: circleBg,
+                  border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
+                  boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
+                  willChange: "transform",
+                  pointerEvents: "auto",
+                }}
+                initial={{ x: SEMI_DIAMETER, zIndex: 1 }}
+                animate={{ x: 0, zIndex: 2 }}
+                exit={{ x: SEMI_DIAMETER, zIndex: 3 }}
+                transition={{ duration: 1.1, ease: EASE_CINEMATIC }}
+                whileHover={{ scale: 1.04 }}
+                onClick={() => {
+                  if (!isDetail && currentRecipe) {
+                    setViewState(2);
+                    setSelectedRecipeId(currentRecipe.id);
+                  }
+                }}
+                aria-label={`${currentRecipe.name} 상세 보기`}
+              >
+                {recipeEmoji[currentRecipe.id] ?? "🍽️"}
+              </motion.button>
+            </AnimatePresence>
+          )}
+        </motion.div>
+
+        {/* ═══ DETAIL HERO — morphs from carousel position (standalone) ═══ */}
         <motion.div
           className="absolute z-30 overflow-hidden rounded-full"
           style={{
@@ -350,41 +410,25 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
             boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
             willChange: "transform, opacity",
-            pointerEvents: isDetail ? "none" : "auto",
+            pointerEvents: isDetail ? "none" : "none",
           }}
-          initial={{ x: "100vw", opacity: 0 }}
+          initial={false}
           animate={
-            !visible
-              ? { x: "100vw", opacity: 0, scale: 1, rotate: 0 }
-              : isDetail
-                ? { x: emojiDx, y: emojiDy, scale: emojiScale, rotate: 360, opacity: 1 }
-                : { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 }
+            isDetail
+              ? { x: emojiDx, y: emojiDy, scale: emojiScale, rotate: 360, opacity: 1 }
+              : { x: 0, y: 0, scale: 1, rotate: 0, opacity: 0 }
           }
-          transition={cinematic}
+          transition={{
+            ...cinematic,
+            opacity: isDetail
+              ? { duration: 0 }
+              : { duration: 0, delay: cinematic.duration },
+          }}
         >
           {currentRecipe && (
-            <AnimatePresence initial={false}>
-              <motion.button
-                type="button"
-                key={currentRecipe.id}
-                className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full text-7xl"
-                style={{ willChange: "transform" }}
-                initial={{ x: HERO_CIRCLE_SIZE }}
-                animate={{ x: 0 }}
-                exit={{ x: HERO_CIRCLE_SIZE }}
-                transition={{ duration: 1.1, ease: EASE_CINEMATIC }}
-                whileHover={isDetail ? {} : { scale: 1.04 }}
-                onClick={() => {
-                  if (!isDetail && currentRecipe) {
-                    setViewState(2);
-                    setSelectedRecipeId(currentRecipe.id);
-                  }
-                }}
-                aria-label={currentRecipe ? `${currentRecipe.name} 상세 보기` : ""}
-              >
-                {recipeEmoji[currentRecipe.id] ?? "🍽️"}
-              </motion.button>
-            </AnimatePresence>
+            <span className="flex h-full w-full items-center justify-center text-7xl">
+              {recipeEmoji[currentRecipe.id] ?? "🍽️"}
+            </span>
           )}
         </motion.div>
 
