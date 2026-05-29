@@ -196,10 +196,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
     );
   }
 
-  const circleBg = "#2c2c2e";
-
-  const circleGradient = `radial-gradient(circle at 50% 50%, ${cat.color}40 0%, ${circleBg} 50%, ${cat.color}15 100%)`;
-  const detailBg = `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}12 100%)`;
+  const circleBg = "#383941";
+  const smallCircleBg = "#fff";
 
   const cinematic = { duration: 1.2, ease: EASE_CINEMATIC };
 
@@ -239,6 +237,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             top: `calc(50% - ${SEMI_RADIUS}px)`,
             width: SEMI_DIAMETER,
             height: SEMI_DIAMETER,
+            backgroundColor: circleBg,
             willChange: "transform, opacity",
           }}
           initial={{ x: "100vw", opacity: 0 }}
@@ -260,29 +259,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               ? { duration: 1.8, ease: EASE_CINEMATIC, times: [0, 0.5, 1] }
               : cinematic
           }
-        >
-          {/* Carousel gradient */}
-          <motion.div
-            className="absolute inset-0"
-            style={{ background: circleGradient }}
-            animate={{ opacity: isDetail ? 0 : 1 }}
-            transition={cinematic}
-          />
-          {/* Detail gradient */}
-          <motion.div
-            className="absolute inset-0"
-            style={{ background: detailBg }}
-            animate={{ opacity: isDetail ? 1 : 0 }}
-            transition={cinematic}
-          />
-          {/* Inner lighter ring */}
-          <motion.div
-            className="absolute rounded-full"
-            style={{ inset: "16%", backgroundColor: circleBg }}
-            animate={{ opacity: isDetail ? 0 : 0.95 }}
-            transition={isDetail ? { duration: 0 } : cinematic}
-          />
-        </motion.div>
+        />
 
         {/* ═══ ORBIT DOTS ═══ */}
         <motion.div
@@ -314,7 +291,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                   width: MENU_DOT_BASE,
                   height: MENU_DOT_BASE,
                   zIndex: layout.isActive ? 14 : 10,
-                  backgroundColor: circleBg,
+                  backgroundColor: smallCircleBg,
                   boxShadow: layout.isActive
                     ? `0 0 28px ${cat.color}25`
                     : `0 0 16px ${cat.color}12`,
@@ -377,7 +354,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                   height: HERO_CIRCLE_SIZE,
                   left: SEMI_RADIUS - HUB_INSET - heroRadius,
                   top: SEMI_RADIUS - heroRadius,
-                  backgroundColor: circleBg,
+                  backgroundColor: smallCircleBg,
                   border: `3px solid ${cat.color}55`,
                   boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
                   willChange: "transform",
@@ -410,7 +387,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             top: `calc(50% - ${heroRadius}px)`,
             width: HERO_CIRCLE_SIZE,
             height: HERO_CIRCLE_SIZE,
-            backgroundColor: circleBg,
+            backgroundColor: smallCircleBg,
             border: `3px solid ${cat.color}55`,
             boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
             willChange: "transform, opacity",
