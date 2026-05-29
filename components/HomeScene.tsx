@@ -126,6 +126,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         },
                       }
                 }
+                whileHover={{ scale: 1.04, transition: { duration: 0.3, ease: EASE_STANDARD } }}
                 whileTap={{ scale: 0.97 }}
               >
                 <a
