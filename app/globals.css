@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-/* ===== Light Theme (default) ===== */
-:root,
-[data-theme="light"] {
-  --bg: #faf9f7;
-  --bg-deep: #f3f1ed;
+:root {
+  --bg: #ffffff;
+  --bg-deep: #f8f8f8;
   --fg: #1a1a1a;
   --gold: #c8a96e;
 
@@ -22,47 +20,11 @@
   --btn-outline-border: rgba(0, 0, 0, 0.12);
   --btn-outline-hover: rgba(0, 0, 0, 0.18);
 
-  --card-korean: #fef3e2;
-  --card-chinese: #fde8e8;
-  --card-western: #e8f5f3;
-
   --vignette-opacity: 0.15;
   --noise-opacity: 0.03;
   --glow-strength: 15;
   --scrollbar-thumb: rgba(0, 0, 0, 0.12);
   --scrollbar-hover: rgba(0, 0, 0, 0.2);
-}
-
-/* ===== Dark Theme ===== */
-[data-theme="dark"] {
-  --bg: #0d0d0d;
-  --bg-deep: #080808;
-  --fg: #e8e4de;
-  --gold: #c8a96e;
-
-  --text-primary: rgba(255, 255, 255, 0.92);
-  --text-secondary: rgba(255, 255, 255, 0.55);
-  --text-muted: rgba(255, 255, 255, 0.35);
-  --text-faint: rgba(255, 255, 255, 0.2);
-
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-hover: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.08);
-
-  --sidebar-bg: rgba(0, 0, 0, 0.45);
-  --overlay-bg: rgba(0, 0, 0, 0.25);
-  --btn-outline-border: rgba(255, 255, 255, 0.1);
-  --btn-outline-hover: rgba(255, 255, 255, 0.2);
-
-  --card-korean: #2a1f14;
-  --card-chinese: #1f1414;
-  --card-western: #14201f;
-
-  --vignette-opacity: 0.4;
-  --noise-opacity: 0.04;
-  --glow-strength: 25;
-  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
-  --scrollbar-hover: rgba(255, 255, 255, 0.2);
 }
 
 @theme inline {

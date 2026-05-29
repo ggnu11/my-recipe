@@ -12,10 +12,8 @@ import {
   getIngredientsByRecipe,
   getStepsByRecipe,
   recipeEmoji,
-  categoryDarkBg,
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
-import { useThemeStore } from "@/store/themeStore";
 
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
@@ -72,8 +70,6 @@ interface CategorySceneProps {
 export function CategoryScene({ category, visible, visitKey }: CategorySceneProps) {
   const cat = getCategoryBySlug(category);
   const recipeList = getRecipesByCategory(category);
-  const theme = useThemeStore((s) => s.theme);
-  const isDark = theme === "dark";
 
   const {
     selectedMenuIndex,
@@ -200,14 +196,10 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
     );
   }
 
-  const circleBg = isDark ? (categoryDarkBg[category] ?? cat.bg_color) : cat.bg_color;
+  const circleBg = "#2c2c2e";
 
-  const circleGradient = isDark
-    ? `radial-gradient(circle at 50% 50%, ${cat.color}35 0%, ${circleBg} 55%, ${circleBg} 100%)`
-    : `radial-gradient(circle at 50% 50%, ${cat.color}55 0%, ${circleBg} 50%, ${cat.color}25 100%)`;
-  const detailBg = isDark
-    ? `linear-gradient(160deg, ${categoryDarkBg[category] ?? "#1e1e1e"} 0%, ${cat.color}12 100%)`
-    : `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}12 100%)`;
+  const circleGradient = `radial-gradient(circle at 50% 50%, ${cat.color}40 0%, ${circleBg} 50%, ${cat.color}15 100%)`;
+  const detailBg = `linear-gradient(160deg, ${circleBg} 0%, ${cat.color}12 100%)`;
 
   const cinematic = { duration: 1.2, ease: EASE_CINEMATIC };
 
@@ -231,12 +223,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
         className="pointer-events-none absolute inset-0 z-0"
         animate={{
           background: isDetail
-            ? isDark
-              ? `radial-gradient(ellipse at 50% 50%, #1a1a1a 0%, #0a0a0a 60%, #000 100%)`
-              : `radial-gradient(ellipse at 50% 50%, #f5f3ef 0%, #eae7e1 60%, #e0ddd6 100%)`
-            : isDark
-              ? `radial-gradient(ellipse at 80% 50%, ${cat.color}12 0%, transparent 50%), #0d0d0d`
-              : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), #faf9f7`,
+            ? `radial-gradient(ellipse at 50% 50%, #f5f3ef 0%, #eae7e1 60%, #e0ddd6 100%)`
+            : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), #ffffff`,
         }}
         transition={{ duration: 1, ease: EASE_CINEMATIC }}
       />
@@ -292,7 +280,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             className="absolute rounded-full"
             style={{ inset: "16%", backgroundColor: circleBg }}
             animate={{ opacity: isDetail ? 0 : 0.95 }}
-            transition={cinematic}
+            transition={isDetail ? { duration: 0 } : cinematic}
           />
         </motion.div>
 
@@ -328,9 +316,9 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                   zIndex: layout.isActive ? 14 : 10,
                   backgroundColor: circleBg,
                   boxShadow: layout.isActive
-                    ? `0 0 28px ${cat.color}${isDark ? "35" : "25"}`
-                    : `0 0 16px ${cat.color}${isDark ? "18" : "12"}`,
-                  border: `2px solid ${cat.color}${layout.isActive ? (isDark ? "70" : "60") : isDark ? "40" : "35"}`,
+                    ? `0 0 28px ${cat.color}25`
+                    : `0 0 16px ${cat.color}12`,
+                  border: `2px solid ${cat.color}${layout.isActive ? "60" : "35"}`,
                   willChange: "transform, opacity",
                 }}
                 animate={{
@@ -390,8 +378,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                   left: SEMI_RADIUS - HUB_INSET - heroRadius,
                   top: SEMI_RADIUS - heroRadius,
                   backgroundColor: circleBg,
-                  border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
-                  boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
+                  border: `3px solid ${cat.color}55`,
+                  boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
                   willChange: "transform",
                   pointerEvents: "auto",
                 }}
@@ -423,8 +411,8 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
             width: HERO_CIRCLE_SIZE,
             height: HERO_CIRCLE_SIZE,
             backgroundColor: circleBg,
-            border: `3px solid ${cat.color}${isDark ? "65" : "55"}`,
-            boxShadow: `0 0 80px ${cat.color}${isDark ? "28" : "18"}, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
+            border: `3px solid ${cat.color}55`,
+            boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
             willChange: "transform, opacity",
             pointerEvents: isDetail ? "none" : "none",
           }}
@@ -516,7 +504,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                       className="rounded-full px-7 py-3 text-sm font-medium transition-opacity hover:opacity-90"
                       style={{
                         backgroundColor: "#c8a96e",
-                        color: isDark ? "#0d0d0d" : "#fff",
+                        color: "#fff",
                       }}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
@@ -694,7 +682,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
         <motion.div
           className="pointer-events-none absolute inset-0 z-0"
           style={{
-            background: `radial-gradient(circle at calc(100% - ${STAGE_INSET}px) 50%, ${cat.color}${isDark ? "10" : "06"} 0%, transparent 38%)`,
+            background: `radial-gradient(circle at calc(100% - ${STAGE_INSET}px) 50%, ${cat.color}06 0%, transparent 38%)`,
           }}
           animate={{ opacity: visible && !isDetail ? 1 : 0 }}
           transition={{ duration: 0.6 }}

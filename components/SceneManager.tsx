@@ -4,7 +4,6 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
-import { ThemeToggle } from "./ThemeToggle";
 import { getCategoryBySlug } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
 
@@ -173,9 +172,7 @@ export function SceneManager() {
           )}
         </AnimatePresence>
 
-        <div className="pointer-events-auto ml-auto">
-          <ThemeToggle />
-        </div>
+        <div className="ml-auto" />
       </div>
 
       <div

@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
 import { categories, recipes, categoryDarkBg } from "@/lib/mock-data";
-import { useThemeStore } from "@/store/themeStore";
 
 const categoryLabel: Record<string, string> = {
   korean: "Korean Food",
@@ -32,9 +31,6 @@ interface HomeSceneProps {
 }
 
 export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
-  const theme = useThemeStore((s) => s.theme);
-  const isDark = theme === "dark";
-
   const handleCategoryClick = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
     onCategoryClick(slug);
@@ -137,10 +133,8 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
                   className="relative z-10 flex h-[200px] flex-col items-center rounded-[22px] px-6 pb-6 pt-[72px] transition-shadow duration-300 group-hover:shadow-xl"
                   style={{
-                    backgroundColor: isDark ? "#1c1c1e" : "#fff",
-                    boxShadow: isDark
-                      ? "0 4px 24px rgba(0,0,0,0.3)"
-                      : "0 4px 24px rgba(0,0,0,0.07)",
+                    backgroundColor: "#fff",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
                   }}
                 >
                   {/* Circular food image — overlapping card top */}
@@ -151,9 +145,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         style={{
                           width: 130,
                           height: 130,
-                          boxShadow: isDark
-                            ? "0 8px 28px rgba(0,0,0,0.5)"
-                            : "0 8px 28px rgba(0,0,0,0.12)",
+                          boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
                         }}
                         whileHover={{
                           scale: 1.08,
@@ -171,7 +163,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       <span
                         className="absolute -right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
                         style={{
-                          backgroundColor: isDark ? "#2a2a2a" : "#fff",
+                          backgroundColor: "#fff",
                           color: cat.color,
                           boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
                         }}

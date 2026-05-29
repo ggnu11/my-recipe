@@ -356,7 +356,7 @@ export const recipeEmoji: Record<string, string> = {
 };
 
 export const categoryDarkBg: Record<string, string> = {
-  korean: "#2a1f14",
-  chinese: "#1f1414",
-  western: "#14201f",
+  korean: "#2c2c2e",
+  chinese: "#2c2c2e",
+  western: "#2c2c2e",
 };
