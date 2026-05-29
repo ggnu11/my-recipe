@@ -551,14 +551,14 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                         </span>
                         <span
                           className="text-center text-xs leading-tight"
-                          style={{ color: "var(--text-primary)" }}
+                          style={{ color: "#fff" }}
                         >
                           {ing.name}
                         </span>
                       </motion.div>
                     ))}
                     {ingredients.length === 0 && (
-                      <p className="text-xs" style={{ color: "var(--text-faint)" }}>
+                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
                         No ingredients
                       </p>
                     )}
@@ -589,7 +589,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                             <h5
                               className="mb-2 text-sm font-bold"
                               style={{
-                                color: "var(--text-primary)",
+                                color: "#fff",
                                 fontFamily: "var(--font-serif), serif",
                               }}
                             >
@@ -597,7 +597,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                             </h5>
                             <p
                               className="text-[13px] leading-[1.9]"
-                              style={{ color: "var(--text-secondary)" }}
+                              style={{ color: "rgba(255,255,255,0.75)" }}
                             >
                               {step.description}
                             </p>
@@ -605,7 +605,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm" style={{ color: "var(--text-faint)" }}>
+                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
                         No cooking steps available.
                       </p>
                     )}
@@ -617,7 +617,6 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
               <motion.div
                 className="flex w-1/2 flex-col"
                 style={{
-                  borderLeft: "1px solid var(--border)",
                   backgroundColor: "var(--overlay-bg)",
                 }}
                 initial={false}
