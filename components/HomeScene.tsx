@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
+
+const UP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 16l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 import { categories, recipes, categoryDarkBg } from "@/lib/mock-data";
 
 const categoryLabel: Record<string, string> = {
@@ -136,6 +138,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                   style={{
                     backgroundColor: "#fff",
                     boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+                    cursor: UP_CURSOR_SVG,
                   }}
                 >
                   {/* Circular food image — overlapping card top */}

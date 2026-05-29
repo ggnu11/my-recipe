@@ -15,8 +15,10 @@ import {
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
 
-// Custom back-arrow cursor (SVG data URI)
+// Custom cursors (SVG data URI)
 const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const FORWARD_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M12 9l5 5-5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const SWAP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M9 16l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
@@ -311,7 +313,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
               <motion.button
                 type="button"
                 key={`orbit-${recipe.id}`}
-                className="absolute flex cursor-pointer items-center justify-center rounded-full text-3xl"
+                className="absolute flex items-center justify-center rounded-full text-3xl"
                 style={{
                   width: MENU_DOT_BASE,
                   height: MENU_DOT_BASE,
@@ -322,6 +324,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                     : `0 0 16px ${cat.color}12`,
                   border: `2px solid ${cat.color}${layout.isActive ? "60" : "35"}`,
                   willChange: "transform, opacity",
+                  cursor: SWAP_CURSOR_SVG,
                 }}
                 animate={{
                   x: layout.x - MENU_DOT_SIZE / 2,
@@ -374,7 +377,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                 data-no-back
                 type="button"
                 key={currentRecipe.id}
-                className="absolute flex cursor-pointer items-center justify-center rounded-full text-7xl"
+                className="absolute flex items-center justify-center rounded-full text-7xl"
                 style={{
                   width: HERO_CIRCLE_SIZE,
                   height: HERO_CIRCLE_SIZE,
@@ -385,6 +388,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                   boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
                   willChange: "transform",
                   pointerEvents: "auto",
+                  cursor: FORWARD_CURSOR_SVG,
                 }}
                 initial={{ x: SEMI_DIAMETER, zIndex: 1 }}
                 animate={{ x: 0, zIndex: 2 }}
