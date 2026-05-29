@@ -15,6 +15,9 @@ import {
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
 
+// Custom back-arrow cursor (SVG data URI)
+const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
 const HERO_CIRCLE_SIZE = 420;
@@ -65,9 +68,10 @@ interface CategorySceneProps {
   category: string;
   visible: boolean;
   visitKey: number;
+  onGoHome: () => void;
 }
 
-export function CategoryScene({ category, visible, visitKey }: CategorySceneProps) {
+export function CategoryScene({ category, visible, visitKey, onGoHome }: CategorySceneProps) {
   const cat = getCategoryBySlug(category);
   const recipeList = getRecipesByCategory(category);
 
@@ -188,6 +192,26 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
     [setIsAnimating, setSelectedMenuIndex, setViewState, setSelectedRecipeId, viewState]
   );
 
+  const handleBgClick = useCallback(
+    (e: React.MouseEvent) => {
+      const el = (e.target as HTMLElement).closest("[data-no-back]");
+      if (el) return;
+      onGoHome();
+    },
+    [onGoHome]
+  );
+
+  const handleDetailBgClick = useCallback(
+    (e: React.MouseEvent) => {
+      const el = (e.target as HTMLElement).closest("[data-no-back]");
+      if (el) return;
+      e.stopPropagation();
+      setViewState(1);
+      setSelectedRecipeId(null);
+    },
+    [setViewState, setSelectedRecipeId]
+  );
+
   if (!cat) {
     return (
       <div className="flex h-full items-center justify-center" style={{ background: "var(--bg)" }}>
@@ -227,7 +251,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
         transition={{ duration: 1, ease: EASE_CINEMATIC }}
       />
 
-      <main ref={mainRef} className="relative z-10 flex flex-1 overflow-x-hidden overflow-y-hidden">
+      <main ref={mainRef} className="relative z-10 flex flex-1 overflow-x-hidden overflow-y-hidden" style={{ cursor: BACK_CURSOR_SVG }} onClick={handleBgClick}>
 
         {/* ═══ BIG CIRCLE — morphs via transform (GPU composited) ═══ */}
         <motion.div
@@ -263,6 +287,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
 
         {/* ═══ ORBIT DOTS ═══ */}
         <motion.div
+          data-no-back
           className="absolute z-20"
           style={{
             right: STAGE_INSET,
@@ -346,6 +371,7 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           {currentRecipe && (
             <AnimatePresence>
               <motion.button
+                data-no-back
                 type="button"
                 key={currentRecipe.id}
                 className="absolute flex cursor-pointer items-center justify-center rounded-full text-7xl"
@@ -418,7 +444,9 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           style={{
             width: "42%",
             pointerEvents: visible && !isDetail ? "auto" : "none",
+            cursor: BACK_CURSOR_SVG,
           }}
+          onClick={handleBgClick}
           initial={{ x: "-100vw" }}
           animate={
             !visible
@@ -467,28 +495,11 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
                     </p>
                   )}
                   <p
-                    className="mb-10 max-w-md leading-[1.8]"
+                    className="max-w-md leading-[1.8]"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     {currentRecipe.description}
                   </p>
-                  <div className="flex gap-4">
-                    <motion.button
-                      onClick={() => {
-                        setViewState(2);
-                        setSelectedRecipeId(currentRecipe.id);
-                      }}
-                      className="rounded-full px-7 py-3 text-sm font-medium transition-opacity hover:opacity-90"
-                      style={{
-                        backgroundColor: "#c8a96e",
-                        color: "#fff",
-                      }}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      상세 보기
-                    </motion.button>
-                  </div>
                 </motion.div>
               </AnimatePresence>
             )}
@@ -511,14 +522,14 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
           }}
         >
           {currentRecipe && (
-            <div className="flex h-full">
+            <div className="flex h-full" onClick={handleDetailBgClick}>
               {/* Left 50% — over morphed circle background */}
-              <div className="flex w-1/2 flex-col overflow-hidden">
-                {/* Spacer for traveling emoji plate */}
-                <div style={{ height: "45%", minHeight: 240 }} />
+              <div className="flex w-1/2 flex-col overflow-hidden" onClick={handleDetailBgClick}>
+                {/* Spacer for traveling emoji plate — clickable to go back */}
+                <div style={{ height: "45%", minHeight: 240, cursor: BACK_CURSOR_SVG }} onClick={handleDetailBgClick} />
 
                 {/* Bottom: Ingredients | Steps */}
-                <div className="flex flex-1 gap-0 overflow-hidden">
+                <div className="flex flex-1 gap-0 overflow-hidden" style={{ cursor: BACK_CURSOR_SVG }} onClick={handleDetailBgClick}>
                   {/* Ingredients column */}
                   <div className="flex w-[160px] shrink-0 flex-col gap-5 overflow-y-auto py-4 pl-6 pr-3">
                     {ingredients.map((ing, i) => (
@@ -615,9 +626,11 @@ export function CategoryScene({ category, visible, visitKey }: CategorySceneProp
 
               {/* Right 50% — Video */}
               <motion.div
+                data-no-back
                 className="flex w-1/2 flex-col"
                 style={{
                   backgroundColor: "var(--overlay-bg)",
+                  cursor: "default",
                 }}
                 initial={false}
                 animate={
