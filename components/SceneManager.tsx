@@ -113,7 +113,7 @@ export function SceneManager() {
               key="title"
               className="text-sm font-bold tracking-[0.2em] uppercase"
               style={{
-                color: "#c8a96e",
+                color: "#1a1a1a",
                 fontFamily: "var(--font-serif), serif",
               }}
               initial={{ opacity: 0 }}

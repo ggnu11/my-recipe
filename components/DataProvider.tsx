@@ -19,7 +19,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       >
         <p
           className="text-sm tracking-[0.2em] uppercase"
-          style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
+          style={{ color: "var(--text-muted)", fontFamily: "var(--font-serif), serif" }}
         >
           Loading...
         </p>

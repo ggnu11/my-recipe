@@ -96,7 +96,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
     supabase
       .from("categories")
       .select("*")
-      .order("slug")
+      .order("sort_order")
       .then(({ data }) => setCategories(data ?? []));
 
     if (recipeId) {

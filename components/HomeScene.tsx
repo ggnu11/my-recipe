@@ -6,7 +6,7 @@ import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
 
-const UP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 16l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const UP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.85'/%3E%3Cpath d='M9 16l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
 const TRAIN_DURATION = 1.4;
 const TRAIN_STAGGER = 0.12;
@@ -41,7 +41,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
         <button
           onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
           className="relative flex h-7 w-14 items-center rounded-full transition-colors"
-          style={{ backgroundColor: locale === "ko" ? "#c8a96e" : "#e07070" }}
+          style={{ backgroundColor: locale === "ko" ? "#2c2c2c" : "#555" }}
         >
           <motion.div
             className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold shadow"
@@ -62,14 +62,14 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
           transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
         >
           <h1
-            className="text-5xl font-bold tracking-[0.06em]"
-            style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
+            className="text-5xl font-bold tracking-[0.04em]"
+            style={{ color: "#1a1a1a", fontFamily: "var(--font-serif), serif" }}
           >
             {i18n.siteTitle}
           </h1>
           <p
-            className="mt-3 text-center text-sm leading-relaxed tracking-wide"
-            style={{ color: "var(--text-muted)" }}
+            className="mt-4 text-center text-[13px] leading-relaxed tracking-wide"
+            style={{ color: "var(--text-secondary)" }}
           >
             {i18n.siteDesc}
           </p>
@@ -77,7 +77,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
 
         {/* Search bar */}
         <motion.div
-          className="mt-8 w-full max-w-sm"
+          className="mt-10 w-full max-w-sm"
           initial={{ opacity: 0, y: 12 }}
           animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{ duration: 0.5, delay: visible ? 0.15 : 0, ease: EASE_CINEMATIC }}
@@ -94,7 +94,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
               height="16"
               viewBox="0 0 16 16"
               fill="none"
-              style={{ opacity: 0.35, flexShrink: 0 }}
+              style={{ opacity: 0.3, flexShrink: 0 }}
             >
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
               <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -102,13 +102,13 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
             <input
               type="text"
               placeholder={i18n.searchPlaceholder}
-              className="w-full bg-transparent text-sm outline-none placeholder:opacity-40"
+              className="w-full bg-transparent text-sm outline-none placeholder:opacity-35"
               style={{ color: "var(--text-primary)" }}
             />
           </div>
         </motion.div>
 
-        {/* Category cards — train animation */}
+        {/* Category cards */}
         <div className="mt-20 flex w-full max-w-4xl gap-8">
           {categories.map((cat, i) => {
             const count = recipes.filter(
@@ -140,20 +140,20 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         },
                       }
                 }
-                whileHover={{ scale: 1.04, transition: { duration: 0.3, ease: EASE_STANDARD } }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.03, transition: { duration: 0.35, ease: EASE_STANDARD } }}
+                whileTap={{ scale: 0.98 }}
               >
                 <a
                   href={`/${cat.slug}`}
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
-                  className="relative z-10 flex h-[220px] flex-col items-center rounded-[22px] px-6 pb-6 pt-[82px] transition-shadow duration-300 group-hover:shadow-xl"
+                  className="relative z-10 flex h-[220px] flex-col items-center rounded-[20px] px-6 pb-6 pt-[82px] transition-shadow duration-300 group-hover:shadow-lg"
                   style={{
                     backgroundColor: "#fff",
-                    boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
+                    boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
                     cursor: UP_CURSOR_SVG,
                   }}
                 >
-                  {/* Circular food image — overlapping card top */}
+                  {/* Circular food image */}
                   <div className="absolute -top-[50px] left-1/2 z-20 -translate-x-1/2">
                     <div className="relative">
                       <motion.div
@@ -161,11 +161,11 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         style={{
                           width: 130,
                           height: 130,
-                          boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
-                          backgroundColor: "#f5f5f0",
+                          boxShadow: "0 6px 24px rgba(0,0,0,0.08)",
+                          backgroundColor: "#f7f7f5",
                         }}
                         whileHover={{
-                          scale: 1.08,
+                          scale: 1.06,
                           transition: { duration: 0.3, ease: EASE_STANDARD },
                         }}
                       >
@@ -180,11 +180,11 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       </motion.div>
                       {/* Recipe count badge */}
                       <span
-                        className="absolute -right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+                        className="absolute -right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold"
                         style={{
                           backgroundColor: "#fff",
                           color: cat.color,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                          boxShadow: "0 1px 6px rgba(0,0,0,0.1)",
                         }}
                       >
                         {count}
@@ -193,7 +193,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                   </div>
 
                   <h3
-                    className="text-lg font-bold tracking-wide"
+                    className="text-[17px] font-bold tracking-wide"
                     style={{
                       color: "var(--text-primary)",
                       fontFamily: "var(--font-serif), serif",
@@ -202,23 +202,23 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                     {catName(cat)}
                   </h3>
                   <p
-                    className="mt-2.5 text-center text-xs leading-relaxed"
+                    className="mt-2 text-center text-xs leading-relaxed"
                     style={{ color: "var(--text-muted)" }}
                   >
                     {catDesc(cat)}
                   </p>
 
-                  <div className="mt-5 flex w-full items-center justify-between">
+                  <div className="mt-auto flex w-full items-center justify-between pt-4">
                     <span
-                      className="text-sm font-semibold"
-                      style={{ color: cat.color }}
+                      className="text-[13px] font-medium"
+                      style={{ color: "var(--text-secondary)" }}
                     >
                       {count}{i18n.recipes}
                     </span>
                     <span
-                      className="rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-wide transition-colors duration-200"
+                      className="rounded-full px-3.5 py-1.5 text-[11px] font-medium tracking-wide"
                       style={{
-                        backgroundColor: `${cat.color}15`,
+                        backgroundColor: `${cat.color}0d`,
                         color: cat.color,
                       }}
                     >

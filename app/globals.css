@@ -4,24 +4,24 @@
   --bg: #ffffff;
   --bg-deep: #f8f8f8;
   --fg: #1a1a1a;
-  --gold: #c8a96e;
+  --gold: #1a1a1a;
 
-  --text-primary: rgba(26, 26, 26, 0.92);
-  --text-secondary: rgba(26, 26, 26, 0.55);
-  --text-muted: rgba(26, 26, 26, 0.35);
-  --text-faint: rgba(26, 26, 26, 0.2);
+  --text-primary: rgba(26, 26, 26, 0.88);
+  --text-secondary: rgba(26, 26, 26, 0.5);
+  --text-muted: rgba(26, 26, 26, 0.32);
+  --text-faint: rgba(26, 26, 26, 0.18);
 
-  --surface: rgba(0, 0, 0, 0.04);
-  --surface-hover: rgba(0, 0, 0, 0.07);
-  --border: rgba(0, 0, 0, 0.08);
+  --surface: rgba(0, 0, 0, 0.03);
+  --surface-hover: rgba(0, 0, 0, 0.06);
+  --border: rgba(0, 0, 0, 0.06);
 
   --sidebar-bg: rgba(255, 255, 255, 0.75);
   --overlay-bg: rgba(0, 0, 0, 0.02);
-  --btn-outline-border: rgba(0, 0, 0, 0.12);
-  --btn-outline-hover: rgba(0, 0, 0, 0.18);
+  --btn-outline-border: rgba(0, 0, 0, 0.1);
+  --btn-outline-hover: rgba(0, 0, 0, 0.16);
 
-  --vignette-opacity: 0.15;
-  --noise-opacity: 0.03;
+  --vignette-opacity: 0.06;
+  --noise-opacity: 0.02;
   --glow-strength: 15;
   --scrollbar-thumb: rgba(0, 0, 0, 0.12);
   --scrollbar-hover: rgba(0, 0, 0, 0.2);

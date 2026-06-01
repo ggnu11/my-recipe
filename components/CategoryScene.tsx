@@ -12,9 +12,9 @@ import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
 
 // Custom cursors (SVG data URI)
-const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
-const FORWARD_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M12 9l5 5-5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
-const SWAP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M9 16l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const FORWARD_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M12 9l5 5-5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const SWAP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M9 16l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
 const SEMI_DIAMETER = 940;
 const SEMI_RADIUS = SEMI_DIAMETER / 2;
@@ -505,7 +505,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                     {(locale === "ja" ? currentRecipe.difficulty_ja : null) ?? currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
                   </p>
                   <h2
-                    className="mb-3 text-5xl font-bold"
+                    className="mb-3 text-[3.2rem] leading-[1.1]"
                     style={{
                       color: "var(--text-primary)",
                       fontFamily: "var(--font-serif), serif",
