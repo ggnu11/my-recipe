@@ -28,6 +28,7 @@ export function SceneManager() {
   const [categoryVisible, setCategoryVisible] = useState(initial.current.scene === "category");
   const [category, setCategory] = useState(initial.current.category);
   const [visitKey, setVisitKey] = useState(0);
+  const [initialMenuIndex, setInitialMenuIndex] = useState(0);
 
   // Browser back/forward
   useEffect(() => {
@@ -66,6 +67,22 @@ export function SceneManager() {
     transitioningRef.current = true;
     window.history.pushState(null, "", `/${slug}`);
     setCategory(slug);
+    setInitialMenuIndex(0);
+    setVisitKey((k) => k + 1);
+    setHomeVisible(false);
+    setCategoryVisible(true);
+    if (stripRef.current) {
+      stripRef.current.style.transition = `transform ${DURATION} ${EASING}`;
+      stripRef.current.style.transform = "translateY(0)";
+    }
+  }, []);
+
+  const handleRecipeClick = useCallback((slug: string, recipeIndex: number) => {
+    if (transitioningRef.current) return;
+    transitioningRef.current = true;
+    window.history.pushState(null, "", `/${slug}`);
+    setCategory(slug);
+    setInitialMenuIndex(recipeIndex);
     setVisitKey((k) => k + 1);
     setHomeVisible(false);
     setCategoryVisible(true);
@@ -144,13 +161,14 @@ export function SceneManager() {
             category={category}
             visible={categoryVisible}
             visitKey={visitKey}
+            initialMenuIndex={initialMenuIndex}
             onGoHome={handleGoHome}
           />
         </div>
 
         {/* Slot 2: Home (at offset 100vh) — visible when strip at translateY(-100vh) */}
         <div style={{ height: "100vh", overflow: "hidden", transform: "translateZ(0)" }}>
-          <HomeScene visible={homeVisible} onCategoryClick={handleCategoryClick} />
+          <HomeScene visible={homeVisible} onCategoryClick={handleCategoryClick} onRecipeClick={handleRecipeClick} />
         </div>
       </div>
     </div>

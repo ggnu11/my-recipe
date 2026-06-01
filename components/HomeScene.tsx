@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
 import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
@@ -14,14 +15,30 @@ const TRAIN_STAGGER = 0.12;
 interface HomeSceneProps {
   visible: boolean;
   onCategoryClick: (slug: string) => void;
+  onRecipeClick: (slug: string, recipeIndex: number) => void;
 }
 
-export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
+export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeSceneProps) {
   const categories = useDataStore((s) => s.categories);
   const recipes = useDataStore((s) => s.recipes);
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const i18n = t(locale);
+
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const handleCategoryClick = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
@@ -33,6 +50,42 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
 
   const catDesc = (cat: (typeof categories)[0]) =>
     (locale === "ja" ? cat.description_ja : null) ?? cat.description ?? "";
+
+  // Search: filter published recipes by query
+  const searchResults = query.trim().length > 0
+    ? recipes.filter((r) => {
+        if (!r.published) return false;
+        const q = query.toLowerCase();
+        const name = r.name.toLowerCase();
+        const nameJa = (r.name_ja ?? "").toLowerCase();
+        const subtitle = (r.subtitle ?? "").toLowerCase();
+        return name.includes(q) || nameJa.includes(q) || subtitle.includes(q);
+      })
+    : [];
+
+  // Group by category
+  const groupedResults = categories
+    .map((cat) => {
+      const catRecipes = recipes.filter((r) => r.category_id === cat.id && r.published);
+      const matched = searchResults.filter((r) => r.category_id === cat.id);
+      return { cat, catRecipes, matched };
+    })
+    .filter((g) => g.matched.length > 0);
+
+  const showDropdown = focused && query.trim().length > 0;
+
+  const handleResultClick = (recipeId: string) => {
+    // Find which category and what index within that category's published recipes
+    const recipe = recipes.find((r) => r.id === recipeId);
+    if (!recipe) return;
+    const cat = categories.find((c) => c.id === recipe.category_id);
+    if (!cat) return;
+    const catRecipes = recipes.filter((r) => r.category_id === cat.id && r.published);
+    const index = catRecipes.findIndex((r) => r.id === recipeId);
+    setQuery("");
+    setFocused(false);
+    onRecipeClick(cat.slug, index >= 0 ? index : 0);
+  };
 
   return (
     <div className="vignette flex h-full flex-col">
@@ -82,29 +135,102 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
           animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{ duration: 0.5, delay: visible ? 0.15 : 0, ease: EASE_CINEMATIC }}
         >
-          <div
-            className="flex items-center gap-3 rounded-full px-5 py-3"
-            style={{
-              backgroundColor: "var(--surface)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              style={{ opacity: 0.3, flexShrink: 0 }}
+          <div ref={wrapperRef} className="relative">
+            <div
+              className="flex items-center gap-3 rounded-full px-5 py-3"
+              style={{
+                backgroundColor: "var(--surface)",
+                border: "1px solid var(--border)",
+              }}
             >
-              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <input
-              type="text"
-              placeholder={i18n.searchPlaceholder}
-              className="w-full bg-transparent text-sm outline-none placeholder:opacity-35"
-              style={{ color: "var(--text-primary)" }}
-            />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                style={{ opacity: 0.3, flexShrink: 0 }}
+              >
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setFocused(true)}
+                placeholder={i18n.searchPlaceholder}
+                className="w-full bg-transparent text-sm outline-none placeholder:opacity-35"
+                style={{ color: "var(--text-primary)" }}
+              />
+              {query && (
+                <button
+                  onClick={() => { setQuery(""); setFocused(false); }}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Search dropdown */}
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-2xl shadow-lg"
+                  style={{ backgroundColor: "#FEFEFE", border: "1px solid var(--border)" }}
+                >
+                  {groupedResults.length > 0 ? (
+                    groupedResults.map((group) => (
+                      <div key={group.cat.id}>
+                        <div
+                          className="sticky top-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
+                          style={{ backgroundColor: "#F1F6F5", color: "var(--text-muted)" }}
+                        >
+                          {catName(group.cat)}
+                        </div>
+                        {group.matched.map((recipe) => (
+                          <button
+                            key={recipe.id}
+                            onClick={() => handleResultClick(recipe.id)}
+                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#F1F6F5]"
+                          >
+                            {recipe.thumbnail_url ? (
+                              <img
+                                src={recipe.thumbnail_url}
+                                alt={recipe.name}
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-sm">
+                                {recipe.emoji ?? "🍽️"}
+                              </span>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                                {(locale === "ja" ? recipe.name_ja : null) ?? recipe.name}
+                              </div>
+                              {recipe.subtitle && (
+                                <div className="truncate text-xs" style={{ color: "var(--text-muted)" }}>
+                                  {(locale === "ja" ? recipe.subtitle_ja : null) ?? recipe.subtitle}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+                      {locale === "ja" ? "結果がありません" : "검색 결과가 없습니다"}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
 

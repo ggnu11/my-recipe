@@ -66,10 +66,11 @@ interface CategorySceneProps {
   category: string;
   visible: boolean;
   visitKey: number;
+  initialMenuIndex?: number;
   onGoHome: () => void;
 }
 
-export function CategoryScene({ category, visible, visitKey, onGoHome }: CategorySceneProps) {
+export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 0, onGoHome }: CategorySceneProps) {
   const { categories, recipes, ingredients: allIngredients, steps: allSteps } = useDataStore();
   const cat = categories.find((c) => c.slug === category);
   const recipeList = useMemo(
@@ -119,12 +120,12 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
   useEffect(() => { rotationStepRef.current = rotationStep; }, [rotationStep]);
 
   useEffect(() => {
-    setSelectedMenuIndex(0);
+    setSelectedMenuIndex(initialMenuIndex);
     setViewState(1);
     setIsAnimating(false);
     setSelectedRecipeId(null);
-    setRotationStep(0);
-    rotationStepRef.current = 0;
+    setRotationStep(initialMenuIndex);
+    rotationStepRef.current = initialMenuIndex;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visitKey]);
 
