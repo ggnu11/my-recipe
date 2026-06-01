@@ -247,8 +247,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
     if (!isEdit) {
       window.location.href = `/admin/recipes/${finalRecipeId}/edit`;
     } else {
-      setMessage("저장 완료!");
-      setTimeout(() => setMessage(""), 2000);
+      window.location.href = "/admin/recipes";
     }
   };
 
