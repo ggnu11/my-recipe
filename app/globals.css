@@ -31,7 +31,7 @@
   --color-background: var(--bg);
   --color-foreground: var(--fg);
   --color-gold: var(--gold);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-pretendard), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-serif);
 }

@@ -257,7 +257,7 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
         animate={{
           background: isDetail
             ? `radial-gradient(ellipse at 50% 50%, #f5f3ef 0%, #eae7e1 60%, #e0ddd6 100%)`
-            : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), #F1F6F5`,
+            : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), papayawhip`,
         }}
         transition={{ duration: 1, ease: EASE_CINEMATIC }}
       />
@@ -358,6 +358,38 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
           })}
         </motion.div>
 
+        {/* ═══ DECO IMAGE — wreath around hero circle ═══ */}
+        {cat.deco_image_url && (
+          <motion.div
+            className="pointer-events-none absolute"
+            style={{
+              zIndex: 15,
+              left: `calc(100% - ${STAGE_INSET + HUB_INSET}px)`,
+              top: "50%",
+              width: HERO_CIRCLE_SIZE * 1.5,
+              height: HERO_CIRCLE_SIZE * 1.5,
+              marginLeft: -(HERO_CIRCLE_SIZE * 1.5) / 2,
+              marginTop: -(HERO_CIRCLE_SIZE * 1.5) / 2,
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={
+              !visible
+                ? { opacity: 0, scale: 0.8 }
+                : isDetail
+                  ? { opacity: 0, scale: 0.8 }
+                  : { opacity: 1, scale: 1 }
+            }
+            transition={{ duration: 1.2, ease: EASE_CINEMATIC }}
+          >
+            <img
+              src={cat.deco_image_url}
+              alt=""
+              className="h-full w-full object-contain"
+              draggable={false}
+            />
+          </motion.div>
+        )}
+
         {/* ═══ HERO CIRCLE CLIP — slides hero in/out on menu change (carousel only) ═══ */}
         <motion.div
           className="absolute z-30 overflow-hidden rounded-full"
@@ -438,7 +470,7 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
             border: `3px solid ${cat.color}55`,
             boxShadow: `0 0 80px ${cat.color}18, 0 0 30px ${cat.color}12, inset 0 0 50px ${cat.color}10`,
             willChange: "transform, opacity",
-            pointerEvents: isDetail ? "none" : "none",
+            pointerEvents: "none",
           }}
           initial={false}
           animate={
@@ -477,12 +509,45 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
             !visible
               ? { x: "-100vw", opacity: 0 }
               : isDetail
-                ? { x: -60, opacity: 0 }
+                ? { x: "-100vw", opacity: 0 }
                 : { x: 0, opacity: 1 }
           }
           transition={cinematic}
         >
-          <div className="px-10 pl-14 lg:px-16 lg:pl-20">
+          {/* Cutting board shape */}
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              width: "115%",
+              height: "80%",
+              top: "10%",
+              left: "-12%",
+              transform: "rotate(-6deg)",
+              borderRadius: "40px",
+              background: `linear-gradient(145deg, ${cat.board_color ?? cat.bg_color}cc, ${cat.board_color ?? cat.bg_color}88)`,
+              boxShadow: `0 8px 40px ${cat.color}10, inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.04)`,
+            }}
+          >
+            {/* Wood grain lines */}
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ borderRadius: "40px", opacity: 0.06 }}
+            >
+              {[18, 32, 50, 65, 82].map((top) => (
+                <div
+                  key={top}
+                  className="absolute left-0 right-0"
+                  style={{
+                    top: `${top}%`,
+                    height: "1px",
+                    background: `linear-gradient(90deg, transparent 0%, ${cat.color} 20%, ${cat.color} 80%, transparent 100%)`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="relative z-10 px-10 pl-14 lg:px-16 lg:pl-20">
             {currentRecipe && (
               <AnimatePresence mode="wait">
                 <motion.div

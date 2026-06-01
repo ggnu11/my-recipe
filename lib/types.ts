@@ -8,6 +8,8 @@ export interface Category {
   image_url: string | null;
   color: string;
   bg_color: string;
+  board_color: string | null;
+  deco_image_url: string | null;
   sort_order: number;
   created_at: string;
 }

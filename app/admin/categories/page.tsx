@@ -15,11 +15,14 @@ type CategoryForm = {
   image_url: string;
   color: string;
   bg_color: string;
+  board_color: string;
+  deco_image_url: string;
 };
 
 const emptyForm: CategoryForm = {
   name: "", name_ja: "", slug: "", description: "", description_ja: "",
-  image_url: "", color: "#333333", bg_color: "#f5f5f5",
+  image_url: "", color: "#333333", bg_color: "#f5f5f5", board_color: "#e8dcc8",
+  deco_image_url: "",
 };
 
 export default function AdminCategories() {
@@ -59,6 +62,8 @@ export default function AdminCategories() {
       image_url: cat.image_url ?? "",
       color: cat.color,
       bg_color: cat.bg_color,
+      board_color: cat.board_color ?? "",
+      deco_image_url: cat.deco_image_url ?? "",
     });
   };
 
@@ -84,6 +89,8 @@ export default function AdminCategories() {
       image_url: form.image_url || null,
       color: form.color,
       bg_color: form.bg_color,
+      board_color: form.board_color || null,
+      deco_image_url: form.deco_image_url || null,
     }).eq("id", id);
     setSaving(false);
     setEditing(null);
@@ -108,6 +115,8 @@ export default function AdminCategories() {
       image_url: form.image_url || null,
       color: form.color,
       bg_color: form.bg_color,
+      board_color: form.board_color || null,
+      deco_image_url: form.deco_image_url || null,
       sort_order: maxOrder + 1,
     });
     setSaving(false);
@@ -285,6 +294,37 @@ export default function AdminCategories() {
               placeholder="예: #fde8e8"
             />
           </div>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            도마색 (HEX)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={form.board_color || "#e8dcc8"}
+              onChange={(e) => setForm({ ...form, board_color: e.target.value })}
+              className="h-9 w-9 cursor-pointer rounded border-0"
+            />
+            <input
+              value={form.board_color}
+              onChange={(e) => setForm({ ...form, board_color: e.target.value })}
+              className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-[#333]"
+              placeholder="예: #e8dcc8"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            데코 이미지 (히어로 원 주변)
+          </label>
+          <ImageUpload
+            value={form.deco_image_url || null}
+            onChange={(url) => setForm({ ...form, deco_image_url: url ?? "" })}
+            folder="categories"
+            size={64}
+            hint="800x800px (투명 배경 PNG)"
+          />
         </div>
       </div>
       <div className="flex justify-end gap-2">
