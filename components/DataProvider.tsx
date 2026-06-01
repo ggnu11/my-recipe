@@ -15,7 +15,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return (
       <div
         className="flex h-screen items-center justify-center"
-        style={{ background: "#fff" }}
+        style={{ background: "#F1F6F5" }}
       >
         <p
           className="text-sm tracking-[0.2em] uppercase"

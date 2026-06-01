@@ -231,7 +231,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
   }
 
   const circleBg = "#383941";
-  const smallCircleBg = "#fff";
+  const smallCircleBg = "#FEFEFE";
 
   const cinematic = { duration: 1.2, ease: EASE_CINEMATIC };
 
@@ -256,7 +256,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
         animate={{
           background: isDetail
             ? `radial-gradient(ellipse at 50% 50%, #f5f3ef 0%, #eae7e1 60%, #e0ddd6 100%)`
-            : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), #ffffff`,
+            : `radial-gradient(ellipse at 80% 50%, ${cat.color}08 0%, transparent 50%), #F1F6F5`,
         }}
         transition={{ duration: 1, ease: EASE_CINEMATIC }}
       />

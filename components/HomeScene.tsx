@@ -41,10 +41,10 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
         <button
           onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
           className="relative flex h-7 w-14 items-center rounded-full transition-colors"
-          style={{ backgroundColor: locale === "ko" ? "#2c2c2c" : "#555" }}
+          style={{ backgroundColor: "#CBFB83" }}
         >
           <motion.div
-            className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold shadow"
+            className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-gray-800 shadow"
             animate={{ x: locale === "ko" ? 4 : 32 }}
             transition={{ duration: 0.25, ease: EASE_STANDARD }}
           >
@@ -148,7 +148,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
                   className="relative z-10 flex h-[220px] flex-col items-center rounded-[20px] px-6 pb-6 pt-[82px] transition-shadow duration-300 group-hover:shadow-lg"
                   style={{
-                    backgroundColor: "#fff",
+                    backgroundColor: "#FEFEFE",
                     boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
                     cursor: UP_CURSOR_SVG,
                   }}
@@ -162,7 +162,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                           width: 130,
                           height: 130,
                           boxShadow: "0 6px 24px rgba(0,0,0,0.08)",
-                          backgroundColor: "#f7f7f5",
+                          backgroundColor: "#F1F6F5",
                         }}
                         whileHover={{
                           scale: 1.06,
@@ -182,7 +182,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       <span
                         className="absolute -right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold"
                         style={{
-                          backgroundColor: "#fff",
+                          backgroundColor: "#FEFEFE",
                           color: cat.color,
                           boxShadow: "0 1px 6px rgba(0,0,0,0.1)",
                         }}
@@ -218,8 +218,8 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                     <span
                       className="rounded-full px-3.5 py-1.5 text-[11px] font-medium tracking-wide"
                       style={{
-                        backgroundColor: `${cat.color}0d`,
-                        color: cat.color,
+                        backgroundColor: "#E8F2AF",
+                        color: "#333",
                       }}
                     >
                       {i18n.explore}
