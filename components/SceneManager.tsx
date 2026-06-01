@@ -121,7 +121,7 @@ export function SceneManager() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
+              {(locale === "ja" ? cat.name_ja : null) ?? cat.name}
             </motion.h2>
           )}
         </AnimatePresence>

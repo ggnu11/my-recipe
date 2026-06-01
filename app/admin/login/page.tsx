@@ -37,7 +37,7 @@ export default function AdminLogin() {
       >
         <h1
           className="mb-6 text-center text-2xl font-bold"
-          style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
+          style={{ color: "#333", fontFamily: "var(--font-serif), serif" }}
         >
           관리자 로그인
         </h1>
@@ -56,7 +56,7 @@ export default function AdminLogin() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-[#c8a96e] focus:ring-1 focus:ring-[#c8a96e]"
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-[#333] focus:ring-1 focus:ring-[#333]"
             required
           />
         </div>
@@ -69,7 +69,7 @@ export default function AdminLogin() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-[#c8a96e] focus:ring-1 focus:ring-[#c8a96e]"
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-[#333] focus:ring-1 focus:ring-[#333]"
             required
           />
         </div>
@@ -78,7 +78,7 @@ export default function AdminLogin() {
           type="submit"
           disabled={loading}
           className="w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50"
-          style={{ backgroundColor: "#c8a96e" }}
+          style={{ backgroundColor: "#333" }}
         >
           {loading ? "..." : "로그인"}
         </button>

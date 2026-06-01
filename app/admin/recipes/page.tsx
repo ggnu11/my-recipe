@@ -51,7 +51,7 @@ export default function AdminRecipes() {
         <a
           href="/admin/recipes/new"
           className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
-          style={{ backgroundColor: "#c8a96e" }}
+          style={{ backgroundColor: "#333" }}
         >
           + 새 레시피
         </a>
@@ -61,7 +61,7 @@ export default function AdminRecipes() {
       <div className="mb-4 flex gap-2">
         <button
           onClick={() => setFilter("all")}
-          className={`rounded-full px-3 py-1 text-xs font-medium ${filter === "all" ? "bg-[#c8a96e] text-white" : "bg-white text-gray-500"}`}
+          className={`rounded-full px-3 py-1 text-xs font-medium ${filter === "all" ? "bg-[#333] text-white" : "bg-white text-gray-500"}`}
         >
           전체 ({recipes.length})
         </button>
@@ -81,11 +81,11 @@ export default function AdminRecipes() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+      <div className="rounded-xl bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-white">
             <tr className="border-b border-gray-100 text-xs text-gray-400">
-              <th className="px-5 py-3 font-medium">이모지</th>
+              <th className="px-5 py-3 font-medium">이미지</th>
               <th className="px-5 py-3 font-medium">이름</th>
               <th className="px-5 py-3 font-medium">카테고리</th>
               <th className="px-5 py-3 font-medium">난이도</th>
@@ -93,51 +93,79 @@ export default function AdminRecipes() {
               <th className="px-5 py-3 font-medium text-right">관리</th>
             </tr>
           </thead>
-          <tbody>
-            {filtered.map((recipe) => (
-              <tr key={recipe.id} className="border-b border-gray-50">
-                <td className="px-5 py-3 text-lg">{recipe.emoji ?? "🍽️"}</td>
-                <td className="px-5 py-3">
-                  <div className="font-medium text-gray-900">{recipe.name}</div>
-                  {recipe.subtitle && (
-                    <div className="text-xs text-gray-400">{recipe.subtitle}</div>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-gray-500">{catName(recipe.category_id)}</td>
-                <td className="px-5 py-3 text-gray-500">{recipe.difficulty ?? "-"}</td>
-                <td className="px-5 py-3">
-                  <button
-                    onClick={() => togglePublish(recipe.id, recipe.published)}
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${recipe.published ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"}`}
-                  >
-                    {recipe.published ? "공개" : "비공개"}
-                  </button>
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <a
-                    href={`/admin/recipes/${recipe.id}/edit`}
-                    className="mr-2 rounded border border-gray-200 px-3 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50"
-                  >
-                    수정
-                  </a>
-                  <button
-                    onClick={() => handleDelete(recipe.id, recipe.name)}
-                    className="rounded border border-red-200 px-3 py-1 text-xs text-red-500 transition-colors hover:bg-red-50"
-                  >
-                    삭제
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
-                  레시피가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
         </table>
+        <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)" }}>
+          <table className="w-full text-left text-sm">
+            <tbody>
+              {filtered.map((recipe) => {
+                const catSlug = categories.find((c) => c.id === recipe.category_id)?.slug;
+                return (
+                  <tr key={recipe.id} className="border-b border-gray-50">
+                    <td className="px-5 py-3">
+                      {recipe.thumbnail_url ? (
+                        <img
+                          src={recipe.thumbnail_url}
+                          alt={recipe.name}
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 text-lg">
+                          {recipe.emoji ?? "🍽️"}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="font-medium text-gray-900">{recipe.name}</div>
+                      {recipe.subtitle && (
+                        <div className="text-xs text-gray-400">{recipe.subtitle}</div>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-gray-500">{catName(recipe.category_id)}</td>
+                    <td className="px-5 py-3 text-gray-500">{recipe.difficulty ?? "-"}</td>
+                    <td className="px-5 py-3">
+                      <button
+                        onClick={() => togglePublish(recipe.id, recipe.published)}
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${recipe.published ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"}`}
+                      >
+                        {recipe.published ? "공개" : "비공개"}
+                      </button>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      {catSlug && (
+                        <a
+                          href={`/${catSlug}`}
+                          target="_blank"
+                          className="mr-2 rounded border border-gray-200 px-3 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+                        >
+                          미리보기
+                        </a>
+                      )}
+                      <a
+                        href={`/admin/recipes/${recipe.id}/edit`}
+                        className="mr-2 rounded border border-gray-200 px-3 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+                      >
+                        수정
+                      </a>
+                      <button
+                        onClick={() => handleDelete(recipe.id, recipe.name)}
+                        className="rounded border border-red-200 px-3 py-1 text-xs text-red-500 transition-colors hover:bg-red-50"
+                      >
+                        삭제
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
+                    레시피가 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

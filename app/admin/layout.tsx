@@ -61,7 +61,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           <a
             href="/admin"
             className="text-lg font-bold"
-            style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
+            style={{ color: "#333", fontFamily: "var(--font-serif), serif" }}
           >
             MY RECIPE 관리
           </a>
@@ -101,8 +101,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
       href={href}
       className="border-b-2 px-1 py-3 text-sm font-medium transition-colors"
       style={{
-        borderColor: isActive ? "#c8a96e" : "transparent",
-        color: isActive ? "#c8a96e" : "#6b7280",
+        borderColor: isActive ? "#333" : "transparent",
+        color: isActive ? "#333" : "#6b7280",
       }}
     >
       {label}

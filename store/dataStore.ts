@@ -20,7 +20,7 @@ export const useDataStore = create<DataState>((set) => ({
 
   fetchAll: async () => {
     const [catRes, recRes, ingRes, stepRes] = await Promise.all([
-      supabase.from("categories").select("*").order("slug"),
+      supabase.from("categories").select("*").order("sort_order"),
       supabase.from("recipes").select("*").order("sort_order"),
       supabase.from("ingredients").select("*").order("sort_order"),
       supabase.from("steps").select("*").order("step_number"),

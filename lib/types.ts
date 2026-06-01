@@ -1,9 +1,14 @@
 export interface Category {
   id: string;
   name: string;
+  name_ja: string | null;
   slug: string;
+  description: string | null;
+  description_ja: string | null;
+  image_url: string | null;
   color: string;
   bg_color: string;
+  sort_order: number;
   created_at: string;
 }
 

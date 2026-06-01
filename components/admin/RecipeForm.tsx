@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { translateToJa } from "@/lib/translate";
 import type { Category, Recipe, Ingredient, Step } from "@/lib/types";
 
 interface RecipeFormProps {
@@ -84,6 +85,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [steps, setSteps] = useState<StepRow[]>([]);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(!!recipeId);
 
@@ -278,6 +280,54 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
     setSteps(steps.map((s) => (s._key === key ? { ...s, [field]: value } : s)));
   };
 
+  const handleAutoTranslate = async () => {
+    setTranslating(true);
+    setMessage("");
+    try {
+      // Collect all Korean texts
+      const recipeTexts = [form.name, form.subtitle, form.description, form.difficulty];
+      const ingTexts = ingredients.flatMap((i) => [i.name, i.amount]);
+      const stepTexts = steps.flatMap((s) => [s.title, s.description, s.tip]);
+      const allTexts = [...recipeTexts, ...ingTexts, ...stepTexts];
+
+      const results = await translateToJa(allTexts);
+
+      let idx = 0;
+      // Recipe fields
+      setForm((prev) => ({
+        ...prev,
+        name_ja: results[idx++] || prev.name_ja,
+        subtitle_ja: results[idx++] || prev.subtitle_ja,
+        description_ja: results[idx++] || prev.description_ja,
+        difficulty_ja: results[idx++] || prev.difficulty_ja,
+      }));
+
+      // Ingredients
+      setIngredients((prev) =>
+        prev.map((ing) => ({
+          ...ing,
+          name_ja: results[idx++] || ing.name_ja,
+          amount_ja: results[idx++] || ing.amount_ja,
+        }))
+      );
+
+      // Steps
+      setSteps((prev) =>
+        prev.map((s) => ({
+          ...s,
+          title_ja: results[idx++] || s.title_ja,
+          description_ja: results[idx++] || s.description_ja,
+          tip_ja: results[idx++] || s.tip_ja,
+        }))
+      );
+
+      setMessage("번역 완료! 확인 후 저장하세요.");
+    } catch {
+      setMessage("번역에 실패했습니다.");
+    }
+    setTranslating(false);
+  };
+
   if (loading) {
     return <div className="py-20 text-center text-gray-400">로딩 중...</div>;
   }
@@ -296,6 +346,22 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
           {message && (
             <span className="text-sm text-green-600">{message}</span>
           )}
+          <button
+            onClick={handleAutoTranslate}
+            disabled={translating || saving}
+            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50"
+          >
+            {translating ? "번역 중..." : "🌐 자동 번역 (일본어)"}
+          </button>
+          {isEdit && form.category_id && (
+            <a
+              href={`/${categories.find((c) => c.id === form.category_id)?.slug ?? ""}`}
+              target="_blank"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+            >
+              미리보기 ↗
+            </a>
+          )}
           <a
             href="/admin/recipes"
             className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600"
@@ -306,7 +372,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
             onClick={handleSave}
             disabled={saving}
             className="rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-            style={{ backgroundColor: "#c8a96e" }}
+            style={{ backgroundColor: "#333" }}
           >
             {saving ? "저장 중..." : "저장"}
           </button>
@@ -454,7 +520,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
                 type="checkbox"
                 checked={form.published}
                 onChange={(e) => setForm({ ...form, published: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300 accent-[#c8a96e]"
+                className="h-4 w-4 rounded border-gray-300 accent-[#333]"
               />
               <span className="text-sm text-gray-600">공개</span>
             </label>
@@ -466,7 +532,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
       <Section
         title="재료"
         action={
-          <button onClick={addIngredient} className="text-xs font-medium text-[#c8a96e]">
+          <button onClick={addIngredient} className="text-xs font-medium text-[#333]">
             + 추가
           </button>
         }
@@ -526,7 +592,7 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
       <Section
         title="조리단계"
         action={
-          <button onClick={addStep} className="text-xs font-medium text-[#c8a96e]">
+          <button onClick={addStep} className="text-xs font-medium text-[#333]">
             + 추가
           </button>
         }
@@ -598,8 +664,8 @@ export function RecipeForm({ recipeId }: RecipeFormProps) {
           outline: none;
         }
         .input:focus {
-          border-color: #c8a96e;
-          box-shadow: 0 0 0 1px #c8a96e;
+          border-color: #333;
+          box-shadow: 0 0 0 1px #333;
         }
       `}</style>
     </div>

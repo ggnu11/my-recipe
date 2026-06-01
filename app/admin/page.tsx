@@ -55,7 +55,7 @@ function StatCard({ label, value }: { label: string; value?: number }) {
       <div className="text-xs text-gray-400">{label}</div>
       <div
         className="mt-1 text-2xl font-bold"
-        style={{ color: "#c8a96e" }}
+        style={{ color: "#333" }}
       >
         {value ?? "-"}
       </div>

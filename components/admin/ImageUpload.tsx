@@ -74,7 +74,7 @@ export function ImageUpload({
         <button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-[#c8a96e] hover:text-[#c8a96e]"
+          className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-[#333] hover:text-[#333]"
           style={{ width: size, height: size }}
         >
           {uploading ? (

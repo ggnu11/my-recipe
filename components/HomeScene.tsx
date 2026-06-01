@@ -8,12 +8,6 @@ import { t } from "@/lib/i18n";
 
 const UP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 16l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
-const categoryImage: Record<string, string> = {
-  korean: "/category-korea.webp",
-  chinese: "/category-chinese.webp",
-  western: "/category-japanese.webp",
-};
-
 const TRAIN_DURATION = 1.4;
 const TRAIN_STAGGER = 0.12;
 
@@ -33,6 +27,12 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
     e.preventDefault();
     onCategoryClick(slug);
   };
+
+  const catName = (cat: (typeof categories)[0]) =>
+    (locale === "ja" ? cat.name_ja : null) ?? cat.name;
+
+  const catDesc = (cat: (typeof categories)[0]) =>
+    (locale === "ja" ? cat.description_ja : null) ?? cat.description ?? "";
 
   return (
     <div className="vignette flex h-full flex-col">
@@ -162,18 +162,21 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                           width: 130,
                           height: 130,
                           boxShadow: "0 8px 28px rgba(0,0,0,0.12)",
+                          backgroundColor: "#f5f5f0",
                         }}
                         whileHover={{
                           scale: 1.08,
                           transition: { duration: 0.3, ease: EASE_STANDARD },
                         }}
                       >
-                        <img
-                          src={categoryImage[cat.slug]}
-                          alt={i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
-                          className="h-full w-full object-cover"
-                          draggable={false}
-                        />
+                        {cat.image_url && (
+                          <img
+                            src={cat.image_url}
+                            alt={catName(cat)}
+                            className="h-full w-full object-cover"
+                            draggable={false}
+                          />
+                        )}
                       </motion.div>
                       {/* Recipe count badge */}
                       <span
@@ -196,13 +199,13 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       fontFamily: "var(--font-serif), serif",
                     }}
                   >
-                    {i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
+                    {catName(cat)}
                   </h3>
                   <p
                     className="mt-2.5 text-center text-xs leading-relaxed"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {i18n.categoryDesc[cat.slug as keyof typeof i18n.categoryDesc]}
+                    {catDesc(cat)}
                   </p>
 
                   <div className="mt-5 flex w-full items-center justify-between">
