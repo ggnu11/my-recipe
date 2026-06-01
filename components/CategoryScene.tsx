@@ -371,15 +371,15 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
               marginLeft: -(HERO_CIRCLE_SIZE * 1.5) / 2,
               marginTop: -(HERO_CIRCLE_SIZE * 1.5) / 2,
             }}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ x: "100vw", rotate: 120, opacity: 0 }}
             animate={
               !visible
-                ? { opacity: 0, scale: 0.8 }
+                ? { x: "100vw", rotate: 120, opacity: 0 }
                 : isDetail
-                  ? { opacity: 0, scale: 0.8 }
-                  : { opacity: 1, scale: 1 }
+                  ? { x: "100vw", rotate: -120, opacity: 0 }
+                  : { x: 0, rotate: 0, opacity: 1 }
             }
-            transition={{ duration: 1.2, ease: EASE_CINEMATIC }}
+            transition={cinematic}
           >
             <img
               src={cat.deco_image_url}
