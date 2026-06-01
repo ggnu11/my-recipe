@@ -2,21 +2,11 @@
 
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
+import { categories, recipes } from "@/lib/mock-data";
+import { useLocaleStore } from "@/store/localeStore";
+import { t } from "@/lib/i18n";
 
 const UP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M9 16l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
-import { categories, recipes, categoryDarkBg } from "@/lib/mock-data";
-
-const categoryLabel: Record<string, string> = {
-  korean: "Korean Food",
-  chinese: "Chinese Food",
-  western: "Western Food",
-};
-
-const categoryDesc: Record<string, string> = {
-  korean: "Traditional flavors passed down through generations",
-  chinese: "Bold and aromatic dishes from the East",
-  western: "Classic European culinary artistry",
-};
 
 const categoryImage: Record<string, string> = {
   korean: "/category-korea.webp",
@@ -33,6 +23,10 @@ interface HomeSceneProps {
 }
 
 export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
+  const locale = useLocaleStore((s) => s.locale);
+  const setLocale = useLocaleStore((s) => s.setLocale);
+  const i18n = t(locale);
+
   const handleCategoryClick = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
     onCategoryClick(slug);
@@ -40,6 +34,22 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
 
   return (
     <div className="vignette flex h-full flex-col">
+      {/* Locale switcher */}
+      <div className="flex justify-end px-8 pt-5">
+        <button
+          onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
+          className="relative flex h-7 w-14 items-center rounded-full transition-colors"
+          style={{ backgroundColor: locale === "ko" ? "#c8a96e" : "#e07070" }}
+        >
+          <motion.div
+            className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold shadow"
+            animate={{ x: locale === "ko" ? 4 : 32 }}
+            transition={{ duration: 0.25, ease: EASE_STANDARD }}
+          >
+            {locale === "ko" ? "KR" : "JP"}
+          </motion.div>
+        </button>
+      </div>
       {/* Center content */}
       <main className="flex flex-1 flex-col items-center justify-center px-10 pb-20">
         {/* Title & description */}
@@ -53,13 +63,13 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
             className="text-5xl font-bold tracking-[0.06em]"
             style={{ color: "#c8a96e", fontFamily: "var(--font-serif), serif" }}
           >
-            MY RECIPE
+            {i18n.siteTitle}
           </h1>
           <p
             className="mt-3 text-center text-sm leading-relaxed tracking-wide"
             style={{ color: "var(--text-muted)" }}
           >
-            Discover culinary artistry from around the world
+            {i18n.siteDesc}
           </p>
         </motion.div>
 
@@ -89,7 +99,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
             </svg>
             <input
               type="text"
-              placeholder="Search recipes..."
+              placeholder={i18n.searchPlaceholder}
               className="w-full bg-transparent text-sm outline-none placeholder:opacity-40"
               style={{ color: "var(--text-primary)" }}
             />
@@ -134,7 +144,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                 <a
                   href={`/${cat.slug}`}
                   onClick={(e) => handleCategoryClick(e, cat.slug)}
-                  className="relative z-10 flex h-[200px] flex-col items-center rounded-[22px] px-6 pb-6 pt-[72px] transition-shadow duration-300 group-hover:shadow-xl"
+                  className="relative z-10 flex h-[220px] flex-col items-center rounded-[22px] px-6 pb-6 pt-[82px] transition-shadow duration-300 group-hover:shadow-xl"
                   style={{
                     backgroundColor: "#fff",
                     boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
@@ -158,7 +168,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       >
                         <img
                           src={categoryImage[cat.slug]}
-                          alt={categoryLabel[cat.slug]}
+                          alt={i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
                           className="h-full w-full object-cover"
                           draggable={false}
                         />
@@ -184,13 +194,13 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       fontFamily: "var(--font-serif), serif",
                     }}
                   >
-                    {categoryLabel[cat.slug]}
+                    {i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
                   </h3>
                   <p
                     className="mt-2.5 text-center text-xs leading-relaxed"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {categoryDesc[cat.slug]}
+                    {i18n.categoryDesc[cat.slug as keyof typeof i18n.categoryDesc]}
                   </p>
 
                   <div className="mt-5 flex w-full items-center justify-between">
@@ -198,7 +208,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                       className="text-sm font-semibold"
                       style={{ color: cat.color }}
                     >
-                      {count} Recipes
+                      {count}{i18n.recipes}
                     </span>
                     <span
                       className="rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-wide transition-colors duration-200"
@@ -207,7 +217,7 @@ export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
                         color: cat.color,
                       }}
                     >
-                      Explore
+                      {i18n.explore}
                     </span>
                   </div>
                 </a>

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
 import { getCategoryBySlug } from "@/lib/mock-data";
+import { useLocaleStore } from "@/store/localeStore";
+import { t } from "@/lib/i18n";
 
 
 const DURATION = "1.6s";
@@ -95,6 +97,8 @@ export function SceneManager() {
   }, []);
 
   const cat = getCategoryBySlug(category);
+  const locale = useLocaleStore((s) => s.locale);
+  const i18n = t(locale);
 
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "var(--bg)" }}>
@@ -116,7 +120,7 @@ export function SceneManager() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {cat.name}
+              {i18n.categoryLabel[cat.slug as keyof typeof i18n.categoryLabel]}
             </motion.h2>
           )}
         </AnimatePresence>

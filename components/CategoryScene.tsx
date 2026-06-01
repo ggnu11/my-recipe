@@ -14,6 +14,8 @@ import {
   recipeEmoji,
 } from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
+import { useLocaleStore } from "@/store/localeStore";
+import { t, getRecipeI18n, getIngredientI18n, getStepI18n } from "@/lib/i18n";
 
 // Custom cursors (SVG data URI)
 const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
@@ -76,6 +78,8 @@ interface CategorySceneProps {
 export function CategoryScene({ category, visible, visitKey, onGoHome }: CategorySceneProps) {
   const cat = getCategoryBySlug(category);
   const recipeList = getRecipesByCategory(category);
+  const locale = useLocaleStore((s) => s.locale);
+  const i18n = t(locale);
 
   const {
     selectedMenuIndex,
@@ -217,7 +221,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
   if (!cat) {
     return (
       <div className="flex h-full items-center justify-center" style={{ background: "var(--bg)" }}>
-        <p style={{ color: "var(--text-muted)" }}>Category not found</p>
+        <p style={{ color: "var(--text-muted)" }}>{i18n.categoryNotFound}</p>
       </div>
     );
   }
@@ -482,7 +486,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                     className="mb-3 text-xs tracking-[0.2em] uppercase"
                     style={{ color: "var(--text-faint)" }}
                   >
-                    {currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
+                    {getRecipeI18n(currentRecipe.id, locale)?.difficulty ?? currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
                   </p>
                   <h2
                     className="mb-3 text-5xl font-bold"
@@ -491,18 +495,18 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                       fontFamily: "var(--font-serif), serif",
                     }}
                   >
-                    {currentRecipe.name}
+                    {getRecipeI18n(currentRecipe.id, locale)?.name ?? currentRecipe.name}
                   </h2>
                   {currentRecipe.subtitle && (
                     <p className="mb-5 text-lg" style={{ color: "var(--text-muted)" }}>
-                      {currentRecipe.subtitle}
+                      {getRecipeI18n(currentRecipe.id, locale)?.subtitle ?? currentRecipe.subtitle}
                     </p>
                   )}
                   <p
                     className="max-w-md leading-[1.8]"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {currentRecipe.description}
+                    {getRecipeI18n(currentRecipe.id, locale)?.description ?? currentRecipe.description}
                   </p>
                 </motion.div>
               </AnimatePresence>
@@ -568,13 +572,13 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                           className="text-center text-xs leading-tight"
                           style={{ color: "#fff" }}
                         >
-                          {ing.name}
+                          {getIngredientI18n(ing.id, locale)?.name ?? ing.name}
                         </span>
                       </motion.div>
                     ))}
                     {ingredients.length === 0 && (
                       <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                        No ingredients
+                        {i18n.noIngredients}
                       </p>
                     )}
                   </div>
@@ -608,20 +612,20 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                                 fontFamily: "var(--font-serif), serif",
                               }}
                             >
-                              Step {step.step_number}
+                              {i18n.step} {step.step_number}
                             </h5>
                             <p
                               className="text-[13px] leading-[1.9]"
                               style={{ color: "rgba(255,255,255,0.75)" }}
                             >
-                              {step.description}
+                              {getStepI18n(step.id, locale)?.description ?? step.description}
                             </p>
                           </motion.div>
                         ))}
                       </div>
                     ) : (
                       <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-                        No cooking steps available.
+                        {i18n.noSteps}
                       </p>
                     )}
                   </div>
@@ -662,7 +666,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                   <div className="flex flex-1 flex-col items-center justify-center gap-4">
                     <span className="text-6xl" style={{ opacity: 0.3 }}>🎬</span>
                     <p className="text-sm tracking-wide" style={{ color: "var(--text-faint)" }}>
-                      Video coming soon
+                      {i18n.videoComingSoon}
                     </p>
                   </div>
                 )}
@@ -689,7 +693,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
             animate={{ opacity: visible && !isDetail ? 1 : 0 }}
             transition={{ duration: 0.5 }}
           >
-            Scroll to change menu
+            {i18n.scrollHint}
           </motion.p>
         )}
       </main>
