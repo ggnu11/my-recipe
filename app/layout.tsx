@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
-import { SceneManager } from "@/components/SceneManager";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,10 +33,7 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="noise-overlay min-h-full">
-        <SceneManager />
-        <div style={{ display: "none" }}>{children}</div>
-      </body>
+      <body className="noise-overlay min-h-full">{children}</body>
     </html>
   );
 }

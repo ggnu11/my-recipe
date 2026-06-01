@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
-import { getCategoryBySlug } from "@/lib/mock-data";
+import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
 
@@ -96,7 +96,8 @@ export function SceneManager() {
     }
   }, []);
 
-  const cat = getCategoryBySlug(category);
+  const categories = useDataStore((s) => s.categories);
+  const cat = categories.find((c) => c.slug === category);
   const locale = useLocaleStore((s) => s.locale);
   const i18n = t(locale);
 

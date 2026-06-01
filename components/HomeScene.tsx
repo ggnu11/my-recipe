@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
-import { categories, recipes } from "@/lib/mock-data";
+import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
 
@@ -23,6 +23,8 @@ interface HomeSceneProps {
 }
 
 export function HomeScene({ visible, onCategoryClick }: HomeSceneProps) {
+  const categories = useDataStore((s) => s.categories);
+  const recipes = useDataStore((s) => s.recipes);
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const i18n = t(locale);

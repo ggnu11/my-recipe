@@ -6,16 +6,10 @@ import {
   EASE_CINEMATIC,
   EASE_STANDARD,
 } from "@/lib/animation";
-import {
-  getCategoryBySlug,
-  getRecipesByCategory,
-  getIngredientsByRecipe,
-  getStepsByRecipe,
-  recipeEmoji,
-} from "@/lib/mock-data";
 import { useShowcaseStore } from "@/store/showcaseStore";
+import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
-import { t, getRecipeI18n, getIngredientI18n, getStepI18n } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 // Custom cursors (SVG data URI)
 const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%23c8a96e' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
@@ -76,8 +70,12 @@ interface CategorySceneProps {
 }
 
 export function CategoryScene({ category, visible, visitKey, onGoHome }: CategorySceneProps) {
-  const cat = getCategoryBySlug(category);
-  const recipeList = getRecipesByCategory(category);
+  const { categories, recipes, ingredients: allIngredients, steps: allSteps } = useDataStore();
+  const cat = categories.find((c) => c.slug === category);
+  const recipeList = useMemo(
+    () => cat ? recipes.filter((r) => r.category_id === cat.id && r.published) : [],
+    [cat, recipes]
+  );
   const locale = useLocaleStore((s) => s.locale);
   const i18n = t(locale);
 
@@ -131,8 +129,14 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
   }, [visitKey]);
 
   const currentRecipe = recipeList[selectedMenuIndex];
-  const ingredients = currentRecipe ? getIngredientsByRecipe(currentRecipe.id) : [];
-  const steps = currentRecipe ? getStepsByRecipe(currentRecipe.id) : [];
+  const ingredients = useMemo(
+    () => currentRecipe ? allIngredients.filter((i) => i.recipe_id === currentRecipe.id) : [],
+    [currentRecipe, allIngredients]
+  );
+  const steps = useMemo(
+    () => currentRecipe ? allSteps.filter((s) => s.recipe_id === currentRecipe.id) : [],
+    [currentRecipe, allSteps]
+  );
 
   const heroRadius = HERO_CIRCLE_SIZE / 2;
   const orbitLayouts = useMemo(
@@ -343,7 +347,11 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                 aria-current={layout.isActive ? "true" : undefined}
                 title={recipe.name}
               >
-                {recipeEmoji[recipe.id] ?? "🍽️"}
+                {recipe.thumbnail_url ? (
+                  <img src={recipe.thumbnail_url} alt={recipe.name} className="h-full w-full rounded-full object-cover" draggable={false} />
+                ) : (
+                  recipe.emoji ?? "🍽️"
+                )}
               </motion.button>
             );
           })}
@@ -407,7 +415,11 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                 }}
                 aria-label={`${currentRecipe.name} 상세 보기`}
               >
-                {recipeEmoji[currentRecipe.id] ?? "🍽️"}
+                {currentRecipe.thumbnail_url ? (
+                  <img src={currentRecipe.thumbnail_url} alt={currentRecipe.name} className="h-full w-full rounded-full object-cover" draggable={false} />
+                ) : (
+                  currentRecipe.emoji ?? "🍽️"
+                )}
               </motion.button>
             </AnimatePresence>
           )}
@@ -440,9 +452,13 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
           }
         >
           {currentRecipe && (
-            <span className="flex h-full w-full items-center justify-center text-7xl">
-              {recipeEmoji[currentRecipe.id] ?? "🍽️"}
-            </span>
+            currentRecipe.thumbnail_url ? (
+              <img src={currentRecipe.thumbnail_url} alt={currentRecipe.name} className="h-full w-full object-cover" draggable={false} />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-7xl">
+                {currentRecipe.emoji ?? "🍽️"}
+              </span>
+            )
           )}
         </motion.div>
 
@@ -486,7 +502,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                     className="mb-3 text-xs tracking-[0.2em] uppercase"
                     style={{ color: "var(--text-faint)" }}
                   >
-                    {getRecipeI18n(currentRecipe.id, locale)?.difficulty ?? currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
+                    {(locale === "ja" ? currentRecipe.difficulty_ja : null) ?? currentRecipe.difficulty} &middot; {currentRecipe.cook_time_min}min
                   </p>
                   <h2
                     className="mb-3 text-5xl font-bold"
@@ -495,18 +511,18 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                       fontFamily: "var(--font-serif), serif",
                     }}
                   >
-                    {getRecipeI18n(currentRecipe.id, locale)?.name ?? currentRecipe.name}
+                    {(locale === "ja" ? currentRecipe.name_ja : null) ?? currentRecipe.name}
                   </h2>
                   {currentRecipe.subtitle && (
                     <p className="mb-5 text-lg" style={{ color: "var(--text-muted)" }}>
-                      {getRecipeI18n(currentRecipe.id, locale)?.subtitle ?? currentRecipe.subtitle}
+                      {(locale === "ja" ? currentRecipe.subtitle_ja : null) ?? currentRecipe.subtitle}
                     </p>
                   )}
                   <p
                     className="max-w-md leading-[1.8]"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {getRecipeI18n(currentRecipe.id, locale)?.description ?? currentRecipe.description}
+                    {(locale === "ja" ? currentRecipe.description_ja : null) ?? currentRecipe.description}
                   </p>
                 </motion.div>
               </AnimatePresence>
@@ -560,19 +576,23 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                         }
                       >
                         <span
-                          className="flex h-[52px] w-[52px] items-center justify-center rounded-full text-xl"
+                          className="flex h-[52px] w-[52px] items-center justify-center overflow-hidden rounded-full text-xl"
                           style={{
                             backgroundColor: `${cat.color}18`,
                             border: `1px solid ${cat.color}30`,
                           }}
                         >
-                          {ing.emoji}
+                          {ing.image_url ? (
+                            <img src={ing.image_url} alt={ing.name} className="h-full w-full object-cover" draggable={false} />
+                          ) : (
+                            ing.emoji
+                          )}
                         </span>
                         <span
                           className="text-center text-xs leading-tight"
                           style={{ color: "#fff" }}
                         >
-                          {getIngredientI18n(ing.id, locale)?.name ?? ing.name}
+                          {(locale === "ja" ? ing.name_ja : null) ?? ing.name}
                         </span>
                       </motion.div>
                     ))}
@@ -618,7 +638,7 @@ export function CategoryScene({ category, visible, visitKey, onGoHome }: Categor
                               className="text-[13px] leading-[1.9]"
                               style={{ color: "rgba(255,255,255,0.75)" }}
                             >
-                              {getStepI18n(step.id, locale)?.description ?? step.description}
+                              {(locale === "ja" ? step.description_ja : null) ?? step.description}
                             </p>
                           </motion.div>
                         ))}
