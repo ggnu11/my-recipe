@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HomeScene } from "./HomeScene";
 import { CategoryScene } from "./CategoryScene";
+import { IntroSplash } from "./IntroSplash";
 import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
@@ -24,6 +25,7 @@ export function SceneManager() {
   const stripRef = useRef<HTMLDivElement>(null);
   const transitioningRef = useRef(false);
 
+  const [showIntro, setShowIntro] = useState(initial.current.scene === "home");
   const [homeVisible, setHomeVisible] = useState(initial.current.scene === "home");
   const [categoryVisible, setCategoryVisible] = useState(initial.current.scene === "category");
   const [category, setCategory] = useState(initial.current.category);
@@ -120,6 +122,9 @@ export function SceneManager() {
 
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "var(--bg)" }}>
+      {/* Intro splash */}
+      {showIntro && <IntroSplash onComplete={() => setShowIntro(false)} />}
+
       {/* Shared header */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center justify-center px-8 py-5"
