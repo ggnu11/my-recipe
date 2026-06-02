@@ -12,7 +12,8 @@ import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
 
 // Custom cursors (SVG data URI)
-const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const BACK_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
+const BACK_LEFT_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M16 9l-5 5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 const FORWARD_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M12 9l5 5-5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 const SWAP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M9 16l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
@@ -274,6 +275,7 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
             height: SEMI_DIAMETER,
             backgroundColor: circleBg,
             willChange: "transform, opacity",
+            boxShadow: "inset 0 -60px 80px rgba(0,0,0,0.25), inset 0 40px 60px rgba(255,255,255,0.04), 0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.10)",
           }}
           initial={{ x: "100vw", opacity: 0 }}
           animate={
@@ -294,7 +296,49 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
               ? { duration: 1.8, ease: EASE_CINEMATIC, times: [0, 0.5, 1] }
               : cinematic
           }
-        />
+        >
+          {/* Wave layers */}
+          <div
+            className="big-circle-wave absolute"
+            style={{
+              width: "200%",
+              height: "200%",
+              left: "-50%",
+              top: "-50%",
+              background: "radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.06) 0%, transparent 60%)",
+              animation: "bigCircleWave1 8s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="big-circle-wave absolute"
+            style={{
+              width: "180%",
+              height: "180%",
+              left: "-40%",
+              top: "-30%",
+              background: "radial-gradient(ellipse at 60% 50%, rgba(255,255,255,0.04) 0%, transparent 55%)",
+              animation: "bigCircleWave2 12s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="big-circle-wave absolute"
+            style={{
+              width: "160%",
+              height: "160%",
+              left: "-30%",
+              bottom: "-40%",
+              background: "radial-gradient(ellipse at 50% 70%, rgba(0,0,0,0.12) 0%, transparent 50%)",
+              animation: "bigCircleWave3 10s ease-in-out infinite",
+            }}
+          />
+          {/* Highlight rim */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.12) 100%)",
+            }}
+          />
+        </motion.div>
 
         {/* ═══ ORBIT DOTS ═══ */}
         <motion.div
@@ -616,10 +660,10 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
               {/* Left 50% — over morphed circle background */}
               <div className="flex w-1/2 flex-col overflow-hidden" onClick={handleDetailBgClick}>
                 {/* Spacer for traveling emoji plate — clickable to go back */}
-                <div style={{ height: "45%", minHeight: 240, cursor: BACK_CURSOR_SVG }} onClick={handleDetailBgClick} />
+                <div style={{ height: "45%", minHeight: 240, cursor: BACK_LEFT_CURSOR_SVG }} onClick={handleDetailBgClick} />
 
                 {/* Bottom: Ingredients | Steps */}
-                <div className="flex flex-1 gap-0 overflow-hidden" style={{ cursor: BACK_CURSOR_SVG }} onClick={handleDetailBgClick}>
+                <div className="flex flex-1 gap-0 overflow-hidden" style={{ cursor: BACK_LEFT_CURSOR_SVG }} onClick={handleDetailBgClick}>
                   {/* Ingredients column */}
                   <div className="flex w-[160px] shrink-0 flex-col gap-5 overflow-y-auto py-4 pl-6 pr-3">
                     {ingredients.map((ing, i) => (

@@ -132,6 +132,10 @@ export function SceneManager() {
               style={{
                 color: "#1a1a1a",
                 fontFamily: "var(--font-serif), serif",
+                backgroundColor: "rgba(255,255,255,0.65)",
+                backdropFilter: "blur(8px)",
+                padding: "6px 18px",
+                borderRadius: "20px",
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
