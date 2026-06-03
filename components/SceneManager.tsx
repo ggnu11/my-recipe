@@ -7,7 +7,6 @@ import { CategoryScene } from "./CategoryScene";
 import { IntroSplash } from "./IntroSplash";
 import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
-import { t } from "@/lib/i18n";
 
 
 const DURATION = "1.6s";
@@ -25,8 +24,9 @@ export function SceneManager() {
   const stripRef = useRef<HTMLDivElement>(null);
   const transitioningRef = useRef(false);
 
-  const [showIntro, setShowIntro] = useState(initial.current.scene === "home");
-  const [homeVisible, setHomeVisible] = useState(initial.current.scene === "home");
+  const hasIntro = initial.current.scene === "home";
+  const [showIntro, setShowIntro] = useState(hasIntro);
+  const [homeVisible, setHomeVisible] = useState(!hasIntro);
   const [categoryVisible, setCategoryVisible] = useState(initial.current.scene === "category");
   const [category, setCategory] = useState(initial.current.category);
   const [visitKey, setVisitKey] = useState(0);
@@ -62,6 +62,12 @@ export function SceneManager() {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+    // Brief pause after zoom-out, then trigger home content + overlay fade
+    setTimeout(() => setHomeVisible(true), 300);
   }, []);
 
   const handleCategoryClick = useCallback((slug: string) => {
@@ -118,12 +124,11 @@ export function SceneManager() {
   const categories = useDataStore((s) => s.categories);
   const cat = categories.find((c) => c.slug === category);
   const locale = useLocaleStore((s) => s.locale);
-  const i18n = t(locale);
 
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "var(--bg)" }}>
-      {/* Intro splash */}
-      {showIntro && <IntroSplash onComplete={() => setShowIntro(false)} />}
+      {/* Intro slides */}
+      {showIntro && <IntroSplash onComplete={handleIntroComplete} />}
 
       {/* Shared header */}
       <div
@@ -177,7 +182,12 @@ export function SceneManager() {
 
         {/* Slot 2: Home (at offset 100vh) — visible when strip at translateY(-100vh) */}
         <div style={{ height: "100vh", overflow: "hidden", transform: "translateZ(0)" }}>
-          <HomeScene visible={homeVisible} onCategoryClick={handleCategoryClick} onRecipeClick={handleRecipeClick} />
+          <HomeScene
+            visible={homeVisible}
+            hasIntro={hasIntro}
+            onCategoryClick={handleCategoryClick}
+            onRecipeClick={handleRecipeClick}
+          />
         </div>
       </div>
     </div>

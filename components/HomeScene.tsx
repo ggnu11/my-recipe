@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_STANDARD, EASE_CINEMATIC } from "@/lib/animation";
+import { INTRO_IMAGES } from "./IntroSplash";
 import { useDataStore } from "@/store/dataStore";
 import { useLocaleStore } from "@/store/localeStore";
 import { t } from "@/lib/i18n";
@@ -14,22 +15,36 @@ const TRAIN_STAGGER = 0.12;
 
 interface HomeSceneProps {
   visible: boolean;
+  hasIntro?: boolean;
   onCategoryClick: (slug: string) => void;
   onRecipeClick: (slug: string, recipeIndex: number) => void;
 }
 
-export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeSceneProps) {
+export function HomeScene({ visible, hasIntro = false, onCategoryClick, onRecipeClick }: HomeSceneProps) {
   const categories = useDataStore((s) => s.categories);
   const recipes = useDataStore((s) => s.recipes);
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const i18n = t(locale);
 
+  // ─── Intro state ───
+  const [introActive, setIntroActive] = useState(hasIntro);
+
+  useEffect(() => {
+    if (hasIntro && visible && introActive) {
+      const raf = requestAnimationFrame(() => setIntroActive(false));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [hasIntro, visible, introActive]);
+
+  const isDark = introActive;
+  const showContent = !isDark && visible;
+
+  // ─── Search ───
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -51,7 +66,6 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
   const catDesc = (cat: (typeof categories)[0]) =>
     (locale === "ja" ? cat.description_ja : null) ?? cat.description ?? "";
 
-  // Search: filter published recipes by query
   const searchResults = query.trim().length > 0
     ? recipes.filter((r) => {
         if (!r.published) return false;
@@ -63,7 +77,6 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
       })
     : [];
 
-  // Group by category
   const groupedResults = categories
     .map((cat) => {
       const catRecipes = recipes.filter((r) => r.category_id === cat.id && r.published);
@@ -75,7 +88,6 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
   const showDropdown = focused && query.trim().length > 0;
 
   const handleResultClick = (recipeId: string) => {
-    // Find which category and what index within that category's published recipes
     const recipe = recipes.find((r) => r.id === recipeId);
     if (!recipe) return;
     const cat = categories.find((c) => c.id === recipe.category_id);
@@ -87,10 +99,56 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
     onRecipeClick(cat.slug, index >= 0 ? index : 0);
   };
 
+  const cardBaseDelay = hasIntro && !showContent ? 0.5 : (hasIntro ? 0.5 : 0.35);
+
   return (
-    <div className="vignette flex h-full flex-col">
-      {/* Locale switcher */}
-      <div className="flex justify-end px-8 pt-5">
+    <div className="vignette flex h-full flex-col" style={{ position: "relative" }}>
+      {/* ─── 2x2 grid background (always visible, overlay transitions) ─── */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gridTemplateRows: "1fr 1fr",
+          }}
+        >
+          {INTRO_IMAGES.map((img, i) => (
+            <div
+              key={i}
+              style={{
+                backgroundImage: `url(${img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          ))}
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: isDark
+              ? "rgba(0,0,0,0.55)"
+              : "rgba(241,246,245,0.88)",
+            backdropFilter: isDark ? "blur(6px)" : "blur(3px)",
+            transition: "all 1.2s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        />
+      </div>
+
+      {/* ─── Locale switcher ─── */}
+      <div
+        className="flex justify-end px-8 pt-5"
+        style={{
+          position: "relative",
+          zIndex: 2,
+          opacity: showContent ? 1 : 0,
+          transition: "opacity 0.5s ease 0.3s",
+          pointerEvents: showContent ? "auto" : "none",
+        }}
+      >
         <button
           onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
           className="relative flex h-7 w-14 items-center rounded-full transition-colors"
@@ -105,35 +163,48 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
           </motion.div>
         </button>
       </div>
-      {/* Center content */}
-      <main className="flex flex-1 flex-col items-center justify-center px-10 pb-20">
-        {/* Title & description */}
-        <motion.div
-          className="flex flex-col items-center"
-          initial={{ opacity: 0, y: 16 }}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
-        >
-          <h1
-            className="text-5xl font-bold tracking-[0.04em]"
-            style={{ color: "#1a1a1a", fontFamily: "var(--font-serif), serif" }}
-          >
-            {i18n.siteTitle}
-          </h1>
-          <p
-            className="mt-4 text-center text-[13px] leading-relaxed tracking-wide"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {i18n.siteDesc}
-          </p>
-        </motion.div>
 
-        {/* Search bar */}
+      {/* ─── Center content ─── */}
+      <main
+        className="flex flex-1 flex-col items-center justify-center px-10 pb-20"
+        style={{ position: "relative", zIndex: 1 }}
+      >
+        {/* Title — same element, color transitions */}
+        <motion.h1
+          className="text-5xl font-bold tracking-[0.04em]"
+          initial={{ opacity: hasIntro ? 1 : 0, y: hasIntro ? 0 : 16 }}
+          animate={
+            isDark || visible
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 16 }
+          }
+          transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
+          style={{
+            color: isDark ? "#fff" : "#1a1a1a",
+            fontFamily: "var(--font-serif), serif",
+            transition: "color 1s ease",
+          }}
+        >
+          {i18n.siteTitle}
+        </motion.h1>
+
+        {/* Subtitle — appears during morph */}
+        <motion.p
+          className="mt-4 text-center text-[13px] leading-relaxed tracking-wide"
+          initial={{ opacity: 0 }}
+          animate={showContent ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.5, delay: showContent ? 0.2 : 0, ease: EASE_CINEMATIC }}
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {i18n.siteDesc}
+        </motion.p>
+
+        {/* Search bar — appears during morph */}
         <motion.div
           className="mt-10 w-full max-w-sm"
           initial={{ opacity: 0, y: 12 }}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          transition={{ duration: 0.5, delay: visible ? 0.15 : 0, ease: EASE_CINEMATIC }}
+          animate={showContent ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ duration: 0.5, delay: showContent ? 0.4 : 0, ease: EASE_CINEMATIC }}
         >
           <div ref={wrapperRef} className="relative">
             <div
@@ -253,7 +324,7 @@ export function HomeScene({ visible, onCategoryClick, onRecipeClick }: HomeScene
                         x: 0,
                         transition: {
                           duration: TRAIN_DURATION,
-                          delay: 0.35 + i * TRAIN_STAGGER,
+                          delay: cardBaseDelay + i * TRAIN_STAGGER,
                           ease: EASE_CINEMATIC,
                         },
                       }
