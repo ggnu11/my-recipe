@@ -17,18 +17,8 @@ const BACK_LEFT_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 const FORWARD_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M12 9l5 5-5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 const SWAP_CURSOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='13' fill='%232c2c2c' fill-opacity='0.9'/%3E%3Cpath d='M9 12l5-5 5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M9 16l5 5 5-5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 14 14, pointer`;
 
-const SEMI_DIAMETER = 940;
-const SEMI_RADIUS = SEMI_DIAMETER / 2;
-const HERO_CIRCLE_SIZE = 420;
-const MENU_DOT_SIZE = 100;
-const MENU_DOT_BASE = 100;
-const ORBIT_GAP = 24;
-const ORBIT_RADIUS = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
 const ORBIT_ANGLE_STEP = Math.PI * 0.11;
 const VISIBLE_SIDE = 2;
-const STAGE_INSET = 48;
-const HUB_INSET = HERO_CIRCLE_SIZE * 0.55;
-const DETAIL_EMOJI_SIZE = 280;
 
 type OrbitItemLayout = {
   index: number;
@@ -42,11 +32,12 @@ type OrbitItemLayout = {
 function getOrbitLayout(
   index: number,
   rotationStep: number,
-  _total: number
+  _total: number,
+  orbitRadius: number
 ): OrbitItemLayout {
   const angle = Math.PI + (index - rotationStep) * ORBIT_ANGLE_STEP;
-  const x = Math.cos(angle) * ORBIT_RADIUS;
-  const y = Math.sin(angle) * ORBIT_RADIUS;
+  const x = Math.cos(angle) * orbitRadius;
+  const y = Math.sin(angle) * orbitRadius;
   let angleDist = angle - Math.PI;
   angleDist = angleDist - Math.round(angleDist / (2 * Math.PI)) * 2 * Math.PI;
   const stepDist = Math.round(Math.abs(angleDist / ORBIT_ANGLE_STEP));
@@ -114,6 +105,30 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
     return () => ro.disconnect();
   }, []);
 
+  // ─── Viewport-relative sizes ───
+  const sizes = useMemo(() => {
+    const SEMI_DIAMETER = Math.round(cSize.h * 1.05);
+    const SEMI_RADIUS = SEMI_DIAMETER / 2;
+    const HERO_CIRCLE_SIZE = Math.round(SEMI_DIAMETER * 0.447);
+    const MENU_DOT_SIZE = Math.round(SEMI_DIAMETER * 0.107);
+    const MENU_DOT_BASE = MENU_DOT_SIZE;
+    const ORBIT_GAP = Math.round(SEMI_DIAMETER * 0.026);
+    const STAGE_INSET = Math.round(cSize.w * 0.033);
+    const HUB_INSET = HERO_CIRCLE_SIZE * 0.55;
+    const ORBIT_RADIUS = SEMI_RADIUS + MENU_DOT_SIZE / 2 + ORBIT_GAP;
+    const DETAIL_EMOJI_SIZE = Math.round(SEMI_DIAMETER * 0.3);
+    return {
+      SEMI_DIAMETER, SEMI_RADIUS, HERO_CIRCLE_SIZE, MENU_DOT_SIZE,
+      MENU_DOT_BASE, ORBIT_GAP, STAGE_INSET, HUB_INSET, ORBIT_RADIUS,
+      DETAIL_EMOJI_SIZE,
+    };
+  }, [cSize]);
+
+  const {
+    SEMI_DIAMETER, SEMI_RADIUS, HERO_CIRCLE_SIZE, MENU_DOT_SIZE,
+    MENU_DOT_BASE, STAGE_INSET, HUB_INSET, DETAIL_EMOJI_SIZE,
+  } = sizes;
+
   useEffect(() => { wasDetailRef.current = isDetail; }, [isDetail]);
   useEffect(() => { isAnimatingRef.current = isAnimating; }, [isAnimating]);
   useEffect(() => { selectedMenuIndexRef.current = selectedMenuIndex; }, [selectedMenuIndex]);
@@ -142,8 +157,8 @@ export function CategoryScene({ category, visible, visitKey, initialMenuIndex = 
 
   const heroRadius = HERO_CIRCLE_SIZE / 2;
   const orbitLayouts = useMemo(
-    () => recipeList.map((_, i) => getOrbitLayout(i, rotationStep, recipeList.length)),
-    [recipeList, rotationStep]
+    () => recipeList.map((_, i) => getOrbitLayout(i, rotationStep, recipeList.length, sizes.ORBIT_RADIUS)),
+    [recipeList, rotationStep, sizes.ORBIT_RADIUS]
   );
 
   const navigateMenu = useCallback(
